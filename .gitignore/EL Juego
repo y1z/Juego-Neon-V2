@@ -181,10 +181,13 @@ int main()
 			es(2);
 			std::cout << "puedes moverte con las teclas 'n','s','e','o''w' intenta explorar la que esta a tu alrededor y deja de valer verga ";
 			es(3);
-			std::cout << "   __   " << std::endl;
-			std::cout << " _  _ " << std::endl;
-			std::cout << "_   _";
-
+			std::cout <<  "° <|°_°|> °" << std::endl;
+			std::cout <<  "_°_/ | \_°_" << std::endl;
+			std::cout <<  "  _°0|0°_  " << std::endl;
+			std::cout <<  " _ 0 ° 0 _ " << std::endl;
+			std::cout <<  "_   °0°  _" << std::endl;
+			std::cout <<  " |°|_0_|°|  " << std::endl;
+			std::cout << "te estoy viendo °°°°°°°°°°°°°°";
 			es(2);
 		}
 		else// esto deberia indicar que ingresaste un comando que no reconose el juego 
