@@ -10,11 +10,11 @@ class Piso
 public:
 	int filas;
 	int columnas;
-	void crear_Piso(int x, int y )
+	void crear_Piso(int x, int y)
 	{
 		columnas = y;
 		filas = x;
-	
+
 	}
 
 
@@ -23,47 +23,47 @@ public:
 std::vector<std::vector<char>> Nivel_1 // uso estos vectores para dibujar los Nivels del juego este es el Primer piso 
 {
 
-{ '*', '*', '*', '!', '*', 'K' },
-{ 'F', '#', ' ', 'b', ' ', ' ' },
-{ '*', '*', 'k', ' ', '*', '!' },
-{ 'k', ' ', ' ', ' ', ' ', ' ' },
-{ 'E', ' ', '#', ' ', '#', '!' },
-{ ' ', '*', '!', '*', 'e', '*' },
-{ ' ', '*', '*', '*', 'e', ' ' },
-{ ' ', ' ', 'S', ' ', ' ', ' ' },
+	{ '*', '*', '*', '!', '*', 'K' },
+	{ 'F', '#', ' ', 'b', ' ', ' ' },
+	{ '*', '*', 'k', ' ', '*', '!' },
+	{ 'k', ' ', ' ', ' ', ' ', ' ' },
+	{ 'E', ' ', '#', ' ', '#', '!' },
+	{ ' ', '*', '!', '*', 'e', '*' },
+	{ ' ', '*', '*', '*', 'e', ' ' },
+	{ ' ', ' ', 'S', ' ', ' ', ' ' },
 
 };
 
 
 std::vector<std::vector<char>> Nivel_2// esto es el segundo nivel
 {
-	{'*','E','*',' ',' ',' ',' ','*'},
-	{'*','#','*',' ',' ','*','!','e'},
-	{'S','k',' ',' ',' ','*','*',' '},
-	{'*',' ',' ','*','!',' ','*','k'},
-	{'!','#',' ','*','!',' ','!','*'},
-	{'!','e',' ',' ','*',' ',' ',' ','*'},
-	{'*',' ','#','!','>',' ',' ','!','*'},
-	{'!','E',' ','*','*','*','*','b','!'},
-	{'*',' ',' ','#',' ',' ','!','!','f'}
+	{ '*','E','*',' ',' ',' ',' ','*','*' },
+	{ '*','#','*',' ',' ','*','!','e',' ' },
+	{ 'S','k',' ',' ',' ','*','*',' ',' ' },
+	{ '*',' ',' ','*','!',' ','*','k','*' },
+	{ '!','#',' ','*','!',' ','!','*','*' },
+	{ '!','e',' ',' ','*',' ',' ',' ','*' },
+	{ '*',' ','#','!','>',' ',' ','!','*' },
+	{ '!','E',' ','*','*','*','*','b','!' },
+	{ '*',' ',' ','#',' ',' ','!','!','f' }
 
 };
 
 std::vector<std::vector<char>> Nivel_3// esto es el trecer nivel
 {
 
-	{'B',' ',' ',' ',' ',' ',' ','!'},
-	{' ',' ',' ','*','!','e',' ',' '},
-	{' ',' ',' ','*','*','!','e',' '},
-	{' ',' ',' ',' ',' ','*',' ',' '},
-	{'!','!','*',' ',' ',' ','*',' '},
-	{'!','!','*',' ',' ',' ',' ','S'}
+	{ 'B',' ',' ',' ',' ',' ',' ','!' },
+	{ ' ',' ',' ','*','!','e',' ',' ' },
+	{ ' ',' ',' ','*','*','!','e',' ' },
+	{ ' ',' ',' ',' ',' ','*',' ',' ' },
+	{ '!','!','*',' ',' ',' ','*',' ' },
+	{ '!','!','*',' ',' ',' ',' ','S' }
 
 };
 
 
 
-int max_x = 6;
+int max_x = 7;
 int max_y = 8;
 
 std::vector<std::vector<bool>> visitados;// usar esto para revisar los cuartos que visite
@@ -80,7 +80,6 @@ void stop()
 {
 	std::cin.ignore();
 	std::cin.get();
-
 }
 
 class Jugador
@@ -92,7 +91,7 @@ public:
 
 	double M_Ataque = 2;// puede cambiar 
 
-	int m_x;   // horizontales
+	int M_x;   // horizontales
 	int m_y;	 // verticales
 
 	Jugador();
@@ -117,15 +116,15 @@ Jugador::~Jugador()
 }
 
 
-void dibujar_mapa(int x, int y)// estos dos valores son la cordenadas del jugador 
+void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa)// estos dos valores son la cordenadas del jugador 
 {
 	int eje_x = x;
 	int eje_y = y;
 
-	for (int j = 0; j < max_y; j++)
+	for (int j = 0; j < mapa.size(); j++)
 	{
 		std::cout << '\n';
-		for (int i = 0; i < max_x; i++)
+		for (int i = 0; i < mapa[j].size(); i++)
 		{
 			if (eje_x == i && eje_y == j)// imprime la ubicacion del personajes 
 			{
@@ -179,7 +178,7 @@ void dibujar_mapa(int x, int y)// estos dos valores son la cordenadas del jugado
 				//
 				//}
 				//std::cout << ".";
-				std::cout << Nivel_1[j][i];
+				std::cout << mapa[j][i];
 			}
 
 		}
@@ -190,18 +189,8 @@ void dibujar_mapa(int x, int y)// estos dos valores son la cordenadas del jugado
 
 int main()
 {
-	for(int i=0;i<Nivel_3.size();++i)
-	{
-	
-		for (int j=0;j<Nivel_3[i].size();++j)
-		{
-			std::cout << Nivel_3[i][j];
-		}
-		std::cout << std::endl;
-	}
 
-
-	stop();
+	std::vector<std::vector<char>> Copia_nivel;
 
 	Jugador Mi_Jugador;
 	Piso piso;
@@ -211,18 +200,51 @@ int main()
 
 	bool Juego_Activo = true;
 
+	int nuevo_max_x = 0;// para determinar el borde del eje x en el juego
+	int nuevo_max_y = 0;// para determinar el borde del eje y en el juego
+
 	std::cout << " ingresa tu nombre  " << std::endl;
 	std::cin >> Nombre_jugador;
+	std::cout << " dime que piso quieres tienes estas opciones ([{ 1,2,3}]) "; // esta parte del codigo es SOLO para probar el juego y tambien el std::cin>>comando que esta debajo
+	std::cin >> comando;
+	if (comando == "1") 
+	{
+		Copia_nivel = Nivel_1;
+	}
+	else if (comando == "2")
+	{
+		Copia_nivel = Nivel_2;
+	}
+	else if (comando == "3") 
+	{
+		Copia_nivel = Nivel_3;
+	}
+	for (int i = 0; i < Copia_nivel.size(); ++i) // este for es para crear los bordes de los mapas para no sailrse de ellos 
+	{
+	
+		if (nuevo_max_x < Copia_nivel[i].size()) 
+		{
+			nuevo_max_x = Copia_nivel[i].size();
+		}
+		++nuevo_max_y;
+
+	}
+	max_x = nuevo_max_x;
+	max_y = nuevo_max_y;
+
 	std::cout << std::endl << "te puedes mover con las teclar 'n' , 's', 'e','o' y 'w' , las teclas 'w' y 'o' hacen lo mismo " << std::endl;
+
+	
+
 
 	Mi_Jugador.M_Nombre = Nombre_jugador;
 
-	Mi_Jugador.m_x = 2;
+	Mi_Jugador.M_x = 2;
 	Mi_Jugador.m_y = 2;
 
-	dibujar_mapa(Mi_Jugador.m_x, Mi_Jugador.m_y);
+	dibujar_mapa(Mi_Jugador.M_x, Mi_Jugador.m_y, Copia_nivel);
 
-	for (int j = 0; j< max_y; j++)// crear un vector vacio 
+	for (int j = 0; j< Copia_nivel.size(); j++)// crear un vector vacio 
 	{
 		visitados.push_back({});
 
@@ -260,20 +282,20 @@ int main()
 		}
 		else if (comando == "E" || comando == "e" || comando == "pene")
 		{
-			Mi_Jugador.m_x += 1;
+			Mi_Jugador.M_x += 1;
 
-			if (Mi_Jugador.m_x == max_x)
+			if (Mi_Jugador.M_x == max_x)
 			{
-				Mi_Jugador.m_x -= 1;
+				Mi_Jugador.M_x -= 1;
 			}
 		}
 		else if (comando == "O" || comando == "o" || comando == "olaf" || comando == "w" || comando == "W" || comando == "wambo")
 		{
-			Mi_Jugador.m_x -= 1;
+			Mi_Jugador.M_x -= 1;
 
-			if (Mi_Jugador.m_x < 0)
+			if (Mi_Jugador.M_x < 0)
 			{
-				Mi_Jugador.m_x += 1;
+				Mi_Jugador.M_x += 1;
 
 			}
 		}
@@ -305,12 +327,12 @@ int main()
 			std::cout << "te estoy viendo °°°°°°°°°°°°°°";
 			es(2);
 		}
-		else if (comando == "delta") 
+		else if (comando == "delta")
 		{
 			piso.crear_Piso(5, 6);
 			max_y = piso.columnas;
 			max_x = piso.filas;
-		
+
 		}
 		else// esto deberia indicar que ingresaste un comando que no reconose el juego 
 		{
@@ -318,9 +340,9 @@ int main()
 			printf(" khe brega es lo khe dices men ");
 			es(3);
 		}
-		dibujar_mapa(Mi_Jugador.m_x, Mi_Jugador.m_y);
+		dibujar_mapa(Mi_Jugador.M_x, Mi_Jugador.m_y,Copia_nivel);
 		std::cout << std::endl;
-		std::cout << "posicion en [x] " << Mi_Jugador.m_x << " posicion en [y] " << Mi_Jugador.m_y;
+		std::cout << "posicion en [x] " << Mi_Jugador.M_x << " posicion en [y] " << Mi_Jugador.m_y;
 
 	}
 
