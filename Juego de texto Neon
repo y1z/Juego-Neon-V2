@@ -27,7 +27,8 @@ std::vector<std::vector<char>> Nivel_1 // uso estos vectores para dibujar los Ni
 	{ 'F', '#', ' ', 'b', ' ', ' ' },
 	{ '*', '*', 'k', ' ', '*', '!' },
 	{ 'k', ' ', ' ', ' ', ' ', ' ' },
-	{ 'E', ' ', '#', ' ', '#', '!' },
+	{ 'E', ' ', ' ', ' ', '#', '!' },
+	{ ' ', ' ', '#', ' ', ' ', '*' },
 	{ ' ', '*', '!', '*', 'e', '*' },
 	{ ' ', '*', '*', '*', 'e', ' ' },
 	{ ' ', ' ', 'S', ' ', ' ', ' ' },
@@ -61,6 +62,14 @@ std::vector<std::vector<char>> Nivel_3// esto es el trecer nivel
 
 };
 
+std::vector<std::vector<char>> Test// para porbar el fog of war del juego 
+{
+	{ '#','#','#','#','#' },
+	{ '#','#','#','#','#' },
+	{ '#','#','#','#','#' },
+	{ '#','#','#','#','#' },
+
+};
 
 
 int max_x = 7;
@@ -92,7 +101,7 @@ public:
 	double M_Ataque = 2;// puede cambiar 
 
 	int M_x;   // horizontales
-	int m_y;	 // verticales
+	int M_y;	 // verticales
 
 	Jugador();
 	~Jugador();
@@ -101,7 +110,8 @@ private:
 
 	enum Hechisos// posible que no los use ( o le cambio el nombre y use un calendario chino para determinar que Hechisos puedas usar )
 	{
-
+		Fire=2,
+		Firaga=4
 	};
 
 
@@ -121,6 +131,8 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa)// estos dos
 	int eje_x = x;
 	int eje_y = y;
 
+	char Cosas_mapa;
+
 	for (int j = 0; j < mapa.size(); j++)
 	{
 		std::cout << '\n';
@@ -129,56 +141,86 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa)// estos dos
 			if (eje_x == i && eje_y == j)// imprime la ubicacion del personajes 
 			{
 				std::cout << '@';
+				visitados[j][i] = true;
 			}
 			else
 			{
-				//if (i == eje_x + 1 && j == eje_y)
-				//{
-				//	std::cout << '.';
-				//
-				//}
-				//else if (i == eje_x - 1 && j == eje_y)
-				//{
-				//	std::cout << '.';
-
-				//}
-				//else if (i == eje_x  && j == eje_y + 1 )
-				//{
-				//	std::cout << '.';
-
-				//}
-				//else if (i == eje_x && j == eje_y - 1)
-				//{
-				//	std::cout << '.';
-
-				//}
-				//else if (i == eje_x + 1 && j == eje_y + 1)
-				//{
-				//
-				//	std::cout << '.';
-				//}
-				//else if (i == eje_x - 1 && j == eje_y + 1)
-				//{
-
-				//	std::cout << '.';
-				//}
-				//else if (i == eje_x + 1 && j == eje_y - 1)
-				//{
-
-				//	std::cout << '.';
-				//}
-				//else if (i == eje_x - 1 && j == eje_y - 1)
-				//{
-
-				//	std::cout << '.';
-				//}
-				//else
-				//{
-				//	std::cout << ' ';
-				//
-				//}
-				//std::cout << ".";
+				if (visitados[j][i] == true) 
+				{
+					std::cout << mapa[j][i];
+				}
+			else if (j == eje_y && i == eje_x + 1 && visitados[j][i] == false) // este 
+			{
 				std::cout << mapa[j][i];
+				
+				if (eje_x <= max_x) // checa si estamos dentro de los bordes del mapa y para no sailrnos del rango de los vectores 
+				{
+					visitados[j][i] = true;
+				}
+			
+			}
+				else if (j == eje_y  && i == eje_x - 1 && visitados[j][i] == false) // oeste
+				{
+					std::cout << mapa[j][i];
+					if (eje_x >= 1) 
+					{
+						visitados[j][i] = true;
+					}
+				}
+				else if (j == eje_y + 1 && i == eje_x && visitados[j][i] == false) // sur
+				{
+					std::cout << mapa[j][i];
+					if (eje_y <= mapa.size())
+					{
+						visitados[j][i] = true;
+					}
+				}
+				else if (j == eje_y - 1 && i == eje_x && visitados[j][i] == false) // norte
+				{
+					std::cout << mapa[j][i];
+					if (eje_y > 0) 
+					{
+						visitados[j][i] = true;
+					}
+				}
+				else if (j == eje_y + 1 && i == eje_x + 1 && visitados[j][i] == false) // sur este
+				{
+					std::cout << mapa[j][i];
+					if (eje_y <= mapa.size() && eje_x <= max_x) 
+					{
+						visitados[j][i] = true;
+					}
+				}
+				else if (j == eje_y + 1 && i == eje_x - 1 && visitados[j][i] == false) // sur oeste
+				{
+					std::cout << mapa[j][i];
+					
+					if (eje_y <= mapa.size() && eje_x >= 1) 
+					{
+						visitados[j][i] = true;
+					}
+				}
+				else if (j == eje_y - 1 && i == eje_x + 1 && visitados[j][i] == false)  //nor este
+				{
+					std::cout << mapa[j][i];
+					if(eje_y > 0 && eje_x <= max_x)
+					{
+						visitados[j][i] = true;
+					}
+				}
+				else if (j == eje_y - 1 && i == eje_x - 1 && visitados[j][i] == false) // nor oeste
+				{
+					std::cout << mapa[j][i];
+					if(eje_y > 0 && eje_x >= 1)
+					{
+						visitados[j][i] = true;
+					}
+				}
+				else
+				{
+					std::cout << ' ';
+				}
+
 			}
 
 		}
@@ -204,10 +246,14 @@ int main()
 	int nuevo_max_y = 0;// para determinar el borde del eje y en el juego
 
 	std::cout << " ingresa tu nombre  " << std::endl;
+	
 	std::cin >> Nombre_jugador;
+	
 	std::cout << " dime que piso quieres tienes estas opciones ([{ 1,2,3}]) "; // esta parte del codigo es SOLO para probar el juego y tambien el std::cin>>comando que esta debajo
+	
 	std::cin >> comando;
-	if (comando == "1") 
+	
+	if (comando == "1")
 	{
 		Copia_nivel = Nivel_1;
 	}
@@ -215,14 +261,22 @@ int main()
 	{
 		Copia_nivel = Nivel_2;
 	}
-	else if (comando == "3") 
+	else if (comando == "3")
 	{
 		Copia_nivel = Nivel_3;
 	}
+	else if (comando == "p")
+	{
+		Copia_nivel = Test;
+	}
+	else 
+	{
+		Copia_nivel = Nivel_1;
+	}
 	for (int i = 0; i < Copia_nivel.size(); ++i) // este for es para crear los bordes de los mapas para no sailrse de ellos 
 	{
-	
-		if (nuevo_max_x < Copia_nivel[i].size()) 
+
+		if (nuevo_max_x < Copia_nivel[i].size())
 		{
 			nuevo_max_x = Copia_nivel[i].size();
 		}
@@ -234,15 +288,14 @@ int main()
 
 	std::cout << std::endl << "te puedes mover con las teclar 'n' , 's', 'e','o' y 'w' , las teclas 'w' y 'o' hacen lo mismo " << std::endl;
 
-	
-
 
 	Mi_Jugador.M_Nombre = Nombre_jugador;
 
 	Mi_Jugador.M_x = 2;
-	Mi_Jugador.m_y = 2;
+	Mi_Jugador.M_y = 2;
 
-	dibujar_mapa(Mi_Jugador.M_x, Mi_Jugador.m_y, Copia_nivel);
+
+	visitados.reserve(6);
 
 	for (int j = 0; j< Copia_nivel.size(); j++)// crear un vector vacio 
 	{
@@ -256,6 +309,9 @@ int main()
 	}
 
 
+	dibujar_mapa(Mi_Jugador.M_x, Mi_Jugador.M_y, Copia_nivel);
+
+
 	while (Juego_Activo == true)
 	{
 		std::cout << " dime lo que quieres hacer \n";
@@ -263,21 +319,21 @@ int main()
 
 		if (comando == "N" || comando == "n" || comando == "norte" || comando == "Norte")
 		{
-			Mi_Jugador.m_y -= 1;
+			Mi_Jugador.M_y -= 1;
 
-			if (Mi_Jugador.m_y < 0)
+			if (Mi_Jugador.M_y < 0)
 			{
-				Mi_Jugador.m_y += 1;
+				Mi_Jugador.M_y += 1;
 
 			}
 		}
 		else if (comando == "S" || comando == "s" || comando == "succ")
 		{
-			Mi_Jugador.m_y += 1;
+			Mi_Jugador.M_y += 1;
 
-			if (Mi_Jugador.m_y == max_y)
+			if (Mi_Jugador.M_y == max_y)
 			{
-				Mi_Jugador.m_y -= 1;
+				Mi_Jugador.M_y -= 1;
 			}
 		}
 		else if (comando == "E" || comando == "e" || comando == "pene")
@@ -324,7 +380,7 @@ int main()
 			std::cout << " _ 0 ° 0 _ " << std::endl;
 			std::cout << "_   °0°  _" << std::endl;
 			std::cout << " |°|_0_|°|  " << std::endl;
-			std::cout << "te estoy viendo °°°°°°°°°°°°°°";
+			std::cout << "°°°°° te estoy viendo °°°°°°°°°°°°°°";
 			es(2);
 		}
 		else if (comando == "delta")
@@ -340,9 +396,9 @@ int main()
 			printf(" khe brega es lo khe dices men ");
 			es(3);
 		}
-		dibujar_mapa(Mi_Jugador.M_x, Mi_Jugador.m_y,Copia_nivel);
+		dibujar_mapa(Mi_Jugador.M_x, Mi_Jugador.M_y, Copia_nivel);
 		std::cout << std::endl;
-		std::cout << "posicion en [x] " << Mi_Jugador.M_x << " posicion en [y] " << Mi_Jugador.m_y;
+		std::cout << "posicion en [x] " << Mi_Jugador.M_x << " posicion en [y] " << Mi_Jugador.M_y;
 
 	}
 
