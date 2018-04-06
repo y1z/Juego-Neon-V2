@@ -17,7 +17,6 @@ public:
 
 	}
 
-
 };
 
 std::vector<std::vector<char>> Nivel_1 // uso estos vectores para dibujar los Nivels del juego este es el Primer piso 
@@ -62,20 +61,60 @@ std::vector<std::vector<char>> Nivel_3// esto es el trecer nivel
 
 };
 
-std::vector<std::vector<char>> Test// para porbar el fog of war del juego 
+std::vector<std::vector<char>> Test// para probar el fog of war del juego( y el juego en general ) 
 {
 	{ '#','#','#','#','#' },
-	{ '#','#','#','#','#' },
-	{ '#','#','#','#','#' },
+	{ '#',' ',' ',' ','#' },
+	{ '#','e',' ',' ','#' },
 	{ '#','#','#','#','#' },
 
 };
+
+std::vector<std::vector<char>> Personaje_Jugador
+{
+
+	{ ' ',' ',' ',' ',' ',' ', '\t' },
+	{ ' ',' ',' ','@',' ',' ', '\t' },
+	{ ' ',' ','/','|','\\',' ', '\t' },
+	{ ' ',' ',' ','|',' ',' ', '\t' },
+	{ ' ',' ','/',' ','\\',' ', '\t' },
+	{ ' ',' ','|',' ','|',' ', '\t' },
+	{ ' ',' ',' ',' ',' ',' ', '\t' },
+    { ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','\t' },
+	{ ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','\t' },
+	{ ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','\t' },
+	{ ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','\t' },
+	{ ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','\t' },
+
+};
+
+std::vector<std::vector<char>> personaje_2
+{
+
+	{ '\t',' ','?','?','?',' ', ' ' },
+	{ '\t',' ','?','°','?',' ', ' ' },
+	{ '\t',' ',' ','|',' ',' ', ' ' },
+	{ '\t',' ','/','|','\\',' ', ' ' },
+	{ '\t',' ','\\','0','/',' ', ' ' },
+	{ '\t',' ',' ','-',' ',' ', ' ' },
+	{ '\t',' ',' ',' ',' ',' ', ' ' },
+	{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+	{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+	{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+	{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+	{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+	
+};
+
+bool Juego_Activo = true;
 
 
 int max_x = 7;
 int max_y = 8;
 
-std::vector<std::vector<bool>> visitados;// usar esto para revisar los cuartos que visite
+std::vector<std::vector<bool> > visitados;// usar esto para revisar los cuartos que visite
+
+std::vector<std::vector<bool> > Enemigos_ubicacion; // estos vectores sirven para saber si ya visite a un enemigo 
 
 void es(int x)
 {
@@ -100,8 +139,8 @@ public:
 
 	double M_Ataque = 2;// puede cambiar 
 
-	int M_x;   // horizontales
-	int M_y;	 // verticales
+	int M_X;   // horizontales
+	int M_Y;	 // verticales
 
 	Jugador();
 	~Jugador();
@@ -126,6 +165,31 @@ Jugador::~Jugador()
 }
 
 
+
+
+void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::vector<char>> Figura_2) // esta funcion se encargara de dibujar los personajes que van estar en combate 
+{
+	// las dos figuras deberia ser del mismo tamaño
+
+	for (int j = 0; j < Figura_1.size(); j++)
+	{
+		std::cout << std::endl;
+		for (int i = 0; i < Figura_1[j].size(); i++)
+		{
+			std::cout << Figura_1[j][i];
+		}
+		for (int l = 0; l < Figura_2[j].size(); l++)
+		{
+			std::cout << Figura_2[j][l];
+		}
+	}
+	std::cout << std::endl;
+	
+}
+
+
+
+
 void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa)// estos dos valores son la cordenadas del jugador 
 {
 	int eje_x = x;
@@ -138,10 +202,15 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa)// estos dos
 		std::cout << '\n';
 		for (int i = 0; i < mapa[j].size(); i++)
 		{
-			if (eje_x == i && eje_y == j)// imprime la ubicacion del personajes 
+			if (eje_y == j && eje_x == i)// imprime la ubicacion del personajes 
 			{
 				std::cout << '@';
 				visitados[j][i] = true;
+			}
+			else if(mapa[eje_y][eje_x] == 'e' && Enemigos_ubicacion[eje_y][eje_x] == true)
+			{
+				Enemigos_ubicacion[eje_y][eje_x] = false;
+				dibujar_combate(Personaje_Jugador, personaje_2);
 			}
 			else
 			{
@@ -149,16 +218,16 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa)// estos dos
 				{
 					std::cout << mapa[j][i];
 				}
-			else if (j == eje_y && i == eje_x + 1 && visitados[j][i] == false) // este 
-			{
+				else if (j == eje_y && i == eje_x + 1 && visitados[j][i] == false) // este 
+				{
 				std::cout << mapa[j][i];
 				
-				if (eje_x <= max_x) // checa si estamos dentro de los bordes del mapa y para no sailrnos del rango de los vectores 
-				{
-					visitados[j][i] = true;
-				}
+					if (eje_x <= max_x) // checa si estamos dentro de los bordes del mapa y para no sailrnos del rango de los vectores 
+					{
+						visitados[j][i] = true;
+					}
 			
-			}
+				}
 				else if (j == eje_y  && i == eje_x - 1 && visitados[j][i] == false) // oeste
 				{
 					std::cout << mapa[j][i];
@@ -220,18 +289,16 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa)// estos dos
 				{
 					std::cout << ' ';
 				}
-
 			}
-
 		}
 	}
-
 }
 
 
 int main()
 {
 
+	//stop();
 	std::vector<std::vector<char>> Copia_nivel;
 
 	Jugador Mi_Jugador;
@@ -240,7 +307,7 @@ int main()
 	std::string Nombre_jugador;
 	std::string comando;
 
-	bool Juego_Activo = true;
+	
 
 	int nuevo_max_x = 0;// para determinar el borde del eje x en el juego
 	int nuevo_max_y = 0;// para determinar el borde del eje y en el juego
@@ -253,7 +320,7 @@ int main()
 	
 	std::cin >> comando;
 	
-	if (comando == "1")
+	if(comando == "1")
 	{
 		Copia_nivel = Nivel_1;
 	}
@@ -291,68 +358,108 @@ int main()
 
 	Mi_Jugador.M_Nombre = Nombre_jugador;
 
-	Mi_Jugador.M_x = 2;
-	Mi_Jugador.M_y = 2;
-
+	Mi_Jugador.M_X = 2;
+	Mi_Jugador.M_Y = 2;
 
 	visitados.reserve(6);
 
-	for (int j = 0; j< Copia_nivel.size(); j++)// crear un vector vacio 
+	for (int j = 0; j < Copia_nivel.size(); ++j)// crear un vector vacio 
 	{
 		visitados.push_back({});
 
-		for (int i = 0; i<max_x; ++i)// Inicializar las posiciones como no vististadas o false 
+		for (int i = 0; i < max_x; ++i)// Inicializar las posiciones como no vististadas o false 
 		{
 			visitados[j].push_back(false);
 		}
-
+	}
+	for (int j = 0; j < Copia_nivel.size(); ++j)
+	{
+		Enemigos_ubicacion.push_back({});
+		
+		for (int i = 0; i < max_x; ++i)
+		{
+			if (Copia_nivel[j][i] == 'e') 
+			{
+				Enemigos_ubicacion[j].push_back(true);
+			}
+			else
+			{
+				Enemigos_ubicacion[j].push_back(false);
+			}
+		}
+	}
+	for (int j = 0; j < Copia_nivel.size(); ++j)
+	{
+		for (int i = 0; i < Copia_nivel[j].size(); ++i)
+		{
+			if(Copia_nivel[j][i]=='S')
+			{
+				Mi_Jugador.M_Y = j;
+				Mi_Jugador.M_X = i;
+				break;
+			}
+		}
 	}
 
-
-	dibujar_mapa(Mi_Jugador.M_x, Mi_Jugador.M_y, Copia_nivel);
-
+	dibujar_mapa(Mi_Jugador.M_X, Mi_Jugador.M_Y, Copia_nivel);
 
 	while (Juego_Activo == true)
 	{
 		std::cout << " dime lo que quieres hacer \n";
 		std::cin >> comando;
 
-		if (comando == "N" || comando == "n" || comando == "norte" || comando == "Norte")
+		if (comando == "N" || comando == "n" || comando == "norte" || comando == "Norte")// encargado del movimiento y que el jugador no se salga de las bareras del juego 
 		{
-			Mi_Jugador.M_y -= 1;
+			Mi_Jugador.M_Y -= 1;
 
-			if (Mi_Jugador.M_y < 0)
+			if (Mi_Jugador.M_Y < 0)
 			{
-				Mi_Jugador.M_y += 1;
+				Mi_Jugador.M_Y += 1;
 
 			}
-		}
-		else if (comando == "S" || comando == "s" || comando == "succ")
-		{
-			Mi_Jugador.M_y += 1;
-
-			if (Mi_Jugador.M_y == max_y)
+			else if (Copia_nivel[Mi_Jugador.M_Y][Mi_Jugador.M_X] == '*')// esto es para que el juguador no pueda atravesar paredes
 			{
-				Mi_Jugador.M_y -= 1;
+				Mi_Jugador.M_Y += 1;
+			}
+
+		}
+		else if (comando == "S" || comando == "s" || comando == "succ")// encargado del movimiento y que el jugador no se salga de las bareras del juego  
+		{
+			Mi_Jugador.M_Y += 1;
+
+			if (Mi_Jugador.M_Y == max_y)
+			{
+				Mi_Jugador.M_Y -= 1;
+			}
+			else if (Copia_nivel[Mi_Jugador.M_Y][Mi_Jugador.M_X] == '*')// esto es para que el juguador no pueda atravesar paredes
+			{
+				Mi_Jugador.M_Y -= 1;
 			}
 		}
-		else if (comando == "E" || comando == "e" || comando == "pene")
+		else if (comando == "E" || comando == "e" || comando == "pene")// encargado del movimiento y que el jugador no se salga de las bareras del juego  
 		{
-			Mi_Jugador.M_x += 1;
+			Mi_Jugador.M_X += 1;
 
-			if (Mi_Jugador.M_x == max_x)
+			if (Mi_Jugador.M_X == max_x)
 			{
-				Mi_Jugador.M_x -= 1;
+				Mi_Jugador.M_X -= 1;
+			}
+			else if (Copia_nivel[Mi_Jugador.M_Y][Mi_Jugador.M_X] == '*')// esto es para que el juguador no pueda atravesar paredes
+			{
+				Mi_Jugador.M_X -= 1;
 			}
 		}
-		else if (comando == "O" || comando == "o" || comando == "olaf" || comando == "w" || comando == "W" || comando == "wambo")
+		else if (comando == "O" || comando == "o" || comando == "olaf" || comando == "w" || comando == "W" || comando == "wambo")// encargado del movimiento y que el jugador no se salga de las bareras del juego 
 		{
-			Mi_Jugador.M_x -= 1;
+			Mi_Jugador.M_X -= 1;
 
-			if (Mi_Jugador.M_x < 0)
+			if (Mi_Jugador.M_X < 0)
 			{
-				Mi_Jugador.M_x += 1;
-
+				Mi_Jugador.M_X += 1;
+			}
+			else if (Copia_nivel[Mi_Jugador.M_Y][Mi_Jugador.M_X] == '*')// esto es para que el juguador no pueda atravesar paredes
+			{
+				Mi_Jugador.M_X += 1;
 			}
 		}
 		else if (comando == "Nombre" || comando == "nombre" || comando == "estadisticas" || comando == "todo")
@@ -369,7 +476,7 @@ int main()
 		{
 			Juego_Activo = false;
 		}
-		else if (comando == "ayuda" || comando == "Ayuda") //
+		else if (comando == "ayuda" || comando == "Ayuda") // original mente esto era un troll face pero  cuando insertaba el troll face solo saila ? en vez de los caracteres que conformaban la cara
 		{
 			es(2);
 			std::cout << "puedes moverte con las teclas 'n','s','e','o''w' intenta explorar la que esta a tu alrededor y deja de valer verga ";
@@ -378,8 +485,8 @@ int main()
 			std::cout << "_°_/ | \_°_" << std::endl;
 			std::cout << "  _°0|0°_  " << std::endl;
 			std::cout << " _ 0 ° 0 _ " << std::endl;
-			std::cout << "_   °0°  _" << std::endl;
-			std::cout << " |°|_0_|°|  " << std::endl;
+			std::cout << "_   °0°  _ " << std::endl;
+			std::cout << " |°|_0_|°| " << std::endl;
 			std::cout << "°°°°° te estoy viendo °°°°°°°°°°°°°°";
 			es(2);
 		}
@@ -393,12 +500,12 @@ int main()
 		else// esto deberia indicar que ingresaste un comando que no reconose el juego 
 		{
 			es(3);
-			printf(" khe brega es lo khe dices men ");
+			printf(" khe brega es lo khe dices men no entendo ");
 			es(3);
 		}
-		dibujar_mapa(Mi_Jugador.M_x, Mi_Jugador.M_y, Copia_nivel);
+		dibujar_mapa(Mi_Jugador.M_X, Mi_Jugador.M_Y, Copia_nivel);
 		std::cout << std::endl;
-		std::cout << "posicion en [x] " << Mi_Jugador.M_x << " posicion en [y] " << Mi_Jugador.M_y;
+		std::cout << "posicion en [x] " << Mi_Jugador.M_X << " posicion en [y] " << Mi_Jugador.M_Y;
 
 	}
 
@@ -410,14 +517,14 @@ int main()
 
 1) guardar la partida utilizando archivos
 
-2) multiples pisos( niveles )planiados 3
+2) multiples pisos( niveles )planiados 3  [X]
 
 3) objetos para el personaje
 
 4) inventario
 
-5)  formas de enseñar las estadisticas del jugador
+5)  formas de enseñar las estadisticas del jugador [X] 
 
-
+6) sistema de combate basado en tomar turnos 
 
 */
