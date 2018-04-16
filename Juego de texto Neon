@@ -102,9 +102,9 @@ int max_y = 8;
 
 std::vector<std::vector<bool> > visitados;// usar esto para revisar los cuartos que visite
 
-std::vector<std::vector<bool> > Enemigos_ubicacion; // estos vectores sirven para saber si ya visite a un enemigo 
+std::vector<std::vector<bool> > Enemigos_ubicacion; // estos vectores sirven para saber si ya visite a un enemigo en sierta parte del mapa 
 
-void es(int x)
+void extra_line(int x)
 {
 	for (int i = 0; i<x; ++i)
 	{
@@ -133,7 +133,7 @@ public:
 	{
 		int enemigos_derotados;
 		int nivle = 1;
-	
+
 	};
 
 	Experiensa ex;
@@ -145,7 +145,7 @@ public:
 	double M_Ataque = 2;	// puede cambiar 
 
 	std::vector<std::string> inventario;
-	
+
 	int M_X;	// horizontales
 	int M_Y;	// verticales
 
@@ -195,116 +195,109 @@ void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::v
 	}
 	std::cout << std::endl;
 
-	std::cout <<"----------" << tipo_enemigo<<"-----------";
-
-
 	switch (tipo_enemigo)
 	{
 
-		case('e'):
-			while (enemigo_vivo == true)
+	case('e'):
+		while (enemigo_vivo == true)
+		{
+			std::cout << " ?que vas hacer ?" << std::endl;
+			std::cout << " -------- -----  " << std::endl;
+			std::cout << "| ataque | heal |" << std::endl;
+			std::cout << " -------- -----  ";
+
+			extra_line(3);
+
+			std::cin >> Acciones_Batalla;
+
+			if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
 			{
-				std::cout << " ?que vas hacer ?" << std::endl;
-				std::cout << " -------- -----  " << std::endl;
-				std::cout << "| ataque | heal |" << std::endl;
-				std::cout << " -------- -----  ";
-
-				es(3);
-
-				std::cin >> Acciones_Batalla;
-
-				if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
-				{
-					Enemigo_Debil.M_Vida -= jugador.M_Ataque;
-					std::cout << Enemigo_Debil.M_Vida << std::endl;
-				}
-				else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal")
-				{
-					if (jugador.M_Vida >= jugador.M_VidaMaxima)
-					{
-						std::cout << " no puedes sanar algo que no esta herido ";
-					}
-					else
-					{
-						jugador.M_Vida += 3;
-					}
-
-				}
-
-				if (Enemigo_Debil.M_Vida < 1)
-				{
-					enemigo_vivo = false;
-					std::cout << "lo matastes men ";
-				}
-				else
-				{
-					jugador.M_Vida -= Enemigo_Debil.M_Ataque;
-					std::cout << " te golpean men " << std::endl;
-					std::cout << jugador.M_Vida;
-				}
-
+				Enemigo_Debil.M_Vida -= jugador.M_Ataque;
+				std::cout << " Vida Oponente : "<< Enemigo_Debil.M_Vida 
+				<< std::endl;
 			}
-			break;
-
-		case('E'):
-
-			while (enemigo_vivo == true)
+			else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal")
 			{
-				std::cout << " ?que vas hacer ?" << std::endl;
-				std::cout << " -------- -----  " << std::endl;
-				std::cout << "| ataque | heal |" << std::endl;
-				std::cout << " -------- -----  ";
-
-				es(3);
-
-				std::cin >> Acciones_Batalla;
-
-				if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
+				if (jugador.M_Vida >= jugador.M_VidaMaxima)
 				{
-					Enemigo_fuerte.M_Vida -= jugador.M_Ataque;
-					std::cout << " vida Oponente: "<<Enemigo_fuerte.M_Vida;
-					std::cout << std::endl;
-				}
-				else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal")
-				{
-					if (jugador.M_Vida >= jugador.M_VidaMaxima)
-					{
-						std::cout << " no puedes sanar algo que no esta herido ";
-					}
-					else
-					{
-						jugador.M_Vida += 3;
-					}
-
-				}
-
-				if (Enemigo_fuerte.M_Vida < 1)
-				{
-					enemigo_vivo = false;
-					std::cout << "lo matastes men "<<std::endl;
+					std::cout << " no puedes sanar algo que no esta herido ";
 				}
 				else
 				{
-					jugador.M_Vida -= Enemigo_fuerte.M_Ataque;
-					std::cout << " te golpean por " << Enemigo_fuerte.M_Ataque<<" puntos de vida " << std::endl;
-					std::cout <<"vida actual : "<< jugador.M_Vida<<std::endl;
+					jugador.M_Vida += 3;
 				}
 
 			}
 
-		default:
-			break;
+			if (Enemigo_Debil.M_Vida < 1)
+			{
+				enemigo_vivo = false;
+				std::cout << "lo matastes men ";
+			}
+			else
+			{
+				jugador.M_Vida -= Enemigo_Debil.M_Ataque;
+				std::cout << " te golpean por : " <<Enemigo_Debil.M_Ataque<<" puntos de vida "<< std::endl;
+				std::cout <<"tu vida es : "<< jugador.M_Vida<<std::endl;
+			}
+
+		}
+		break;
+
+	case('E'):
+
+		while (enemigo_vivo == true)
+		{
+			std::cout << " ?que vas hacer ?" << std::endl;
+			std::cout << " -------- -----  " << std::endl;
+			std::cout << "| ataque | heal |" << std::endl;
+			std::cout << " -------- -----  ";
+
+			extra_line(3);
+
+			std::cin >> Acciones_Batalla;
+
+			if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
+			{
+				Enemigo_fuerte.M_Vida -= jugador.M_Ataque;
+				std::cout << " Vida Oponente : " << Enemigo_fuerte.M_Vida;
+				std::cout << std::endl;
+			}
+			else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal"||Acciones_Batalla=="cure" || Acciones_Batalla=="Heal"|| Acciones_Batalla=="HEAL")
+			{
+				if (jugador.M_Vida >= jugador.M_VidaMaxima)
+				{
+					std::cout << " no puedes sanar algo que no esta herido ";
+				}
+				else
+				{
+					jugador.M_Vida += 3;
+				}
+
+			}
+
+			if (Enemigo_fuerte.M_Vida < 1)
+			{
+				enemigo_vivo = false;
+				std::cout << "lo matastes men " << std::endl;
+			}
+			else
+			{
+				jugador.M_Vida -= Enemigo_fuerte.M_Ataque;
+				std::cout << " te golpean por " << Enemigo_fuerte.M_Ataque << " puntos de vida " << std::endl;
+				std::cout << "vida actual : " << jugador.M_Vida << std::endl;
+			}
+
+		}
+
+	default:
+		break;
 	}
-
-
-	// todo dentro del while es basicamente para probar un sistema de combate   
 
 }
 
 
-
-
-void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa, Jugador &jugador)// los parametros de esta funcion son 2 int , vector de vectors de charcateres , y la class jugador 
+void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &jugador)// los parametros de esta funcion son 2 int , vector de vectors de charcateres , y la class jugador 
 {
 	int eje_x = x;
 	int eje_y = y;
@@ -421,7 +414,7 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> mapa, Jugador &ju
 
 void Instrucciones()
 {
-	
+
 	std::cout << std::endl << "te puedes mover con las teclar 'n' , 's', 'e','o' y 'w' , las teclas 'w' y 'o' hacen lo mismo " << std::endl;
 	std::cout << "otras comandos que puedes hacer tambien son 'nav', para ver tus estadisticas [nombre] [ataque] [vida] en es orden , 'fin' para sailr del juego " << std::endl;
 	std::cout << " 'ayuda' para ver un consejo que talvez te ayude aqui esta la lista de que simbolo que se usan para representar visualmente todo del juego " << std::endl;
@@ -434,19 +427,40 @@ void Instrucciones()
 	std::cout << "pos data DEJA DE VALER VERGA gracias ;)" << std::endl;
 }
 
-void Guardar_Partida(Jugador &jugador , std::vector<std::vector<char>> mapa)
+
+	//  Funcion de guardar la partida 
+void Guardar_Partida(Jugador &jugador, std::vector<std::vector<char>> mapa, std::vector<std::vector<bool> > visibilidad_mapa)
 {
+
+
 	std::ofstream file("partida.txt");
 
 	file << jugador.M_Nombre << ' ' << jugador.M_Ataque << ' ' << jugador.M_Vida << ' ' << jugador.M_X << ' ' << jugador.M_Y;
 	file << std::endl;
-
-	for (int i =0;i<mapa.size();++i)
+	file << mapa.size() << std::endl;
+	for (int i = 0; i<mapa.size(); ++i)
 	{
-		for (int j = 0; j < mapa[i].size(); ++j) 
+		file << mapa[i].size();
+		
+		for (int j = 0; j < mapa[i].size(); ++j)
 		{
 			file << mapa[i][j];
 	
+		}
+		file << std::endl;
+	}
+	file <<'~' << std::endl;
+
+	file << visibilidad_mapa.size()
+	<<std::endl;
+
+	for (int i = 0; i < visibilidad_mapa.size(); ++i) 
+	{
+		file << visibilidad_mapa[i].size();
+		for (int j = 0; j < visibilidad_mapa[i].size(); ++j) 
+		{
+			
+			file << visibilidad_mapa[i][j];
 		}
 		file << std::endl;
 	}
@@ -455,7 +469,7 @@ void Guardar_Partida(Jugador &jugador , std::vector<std::vector<char>> mapa)
 
 }
 
-
+	// funcion main  
 int main()
 {
 
@@ -518,7 +532,7 @@ int main()
 	std::cout << " @ = tu personaje " << std::endl
 		<< " * = Una pared (no puedes atravesarlas )" << std::endl
 		<< " e = enemigo debil " << std::endl
-		<< " E = enemigo fuerte"<<std::endl
+		<< " E = enemigo fuerte" << std::endl
 		<< " k = llave " << std::endl
 		<< " # = puetas " << std::endl;
 
@@ -548,7 +562,7 @@ int main()
 			{
 				Enemigos_ubicacion[j].push_back(true);
 			}
-			else if(Copia_nivel[j][i]=='E')
+			else if (Copia_nivel[j][i] == 'E')
 			{
 				Enemigos_ubicacion[j].push_back(true);
 			}
@@ -634,41 +648,106 @@ int main()
 		}
 		else if (comando == "Nombre" || comando == "nombre" || comando == "estadisticas" || comando == "todo" || comando == "nav" || comando == "NAV")
 		{
-			es(2);
+			extra_line(2);
 			std::cout << "Nombre : " << Mi_Jugador.M_Nombre;
-			es(2);
+			extra_line(2);
 			std::cout << "Ataque : " << Mi_Jugador.M_Ataque;
-			es(2);
+			extra_line(2);
 			std::cout << "Vida : " << Mi_Jugador.M_Vida;
-			es(2);
+			extra_line(2);
 		}
 		else if (comando == "N3P3" || comando == "n3p3" || comando == "Nani" || comando == "fin" || comando == "FIN")// comandos para sailr del juego ( posilblemente para guardar la partida tambien )
 		{
 			Juego_Activo = false;
-			Guardar_Partida(Mi_Jugador, Copia_nivel);
+			Guardar_Partida(Mi_Jugador, Copia_nivel , visitados);
 		}
-		else if (comando == "cargar")
+			//	Aqui esta la parte del codigo que me deja cargar la partida 
+		else if (comando == "cargar"|| comando=="CARGAR" ||comando=="Cargar")
 		{
 			std::ifstream partida("partida.txt");
-			if (partida.is_open()) 
+			if (partida.is_open())
 			{
 				// lo que dice file es solo para referencia 
 				//file << jugador.M_Nombre << ' ' << jugador.M_Ataque << ' ' << jugador.M_Vida << ' ' << jugador.M_X << ' ' << jugador.M_Y;
-				partida >> Mi_Jugador.M_Nombre >> Mi_Jugador.M_Ataque >> Mi_Jugador.M_Vida>>Mi_Jugador.M_X>>Mi_Jugador.M_Y;
-				std::cout << "exito men ()()()()()()()(=========================="<<std::endl;
+
+				//for (int i = 0; i < visibilidad_mapa.size(); ++i) 
+				//{
+				//	for (int j = 0; j < visibilidad_mapa[i].size(); ++j) 
+				//	{
+				//		file << visibilidad_mapa[i][j];
+				//	}
+				//	file << std::endl;
+				//}
+				
+				
+
+				//for (int i = 0; i<mapa.size(); ++i)
+				//{
+				//	file<< mapa.size();
+				//	
+				//	for (int j = 0; j < mapa[i].size(); ++j)
+				//	{
+				//		file << mapa[i][j];
+				//
+				//	}
+				//	file << ' ' << std::endl;
+				//}
+
+				char simbolos = ' ';
+
+				int renglones = 0;
+
+				int columnas = 0;
+
+				std::vector<std::vector<char>> Mapa_De_Partida;
+
+				partida >> Mi_Jugador.M_Nombre >> Mi_Jugador.M_Ataque >> Mi_Jugador.M_Vida >> Mi_Jugador.M_X >> Mi_Jugador.M_Y;
+
+				partida >> columnas;
+				
+				for (int i = 0; i < columnas; ++i) 
+				{
+					Mapa_De_Partida.push_back({});
+				
+				}
+				partida >> renglones;
+				
+				//Copia_nivel.clear();
+				//Copia_nivel.push_back({});
+				while (partida>>simbolos && simbolos != '~') 
+				{
+					for (int i = 0; i < columnas; ++i) 
+					{
+	
+						for (int j = 0; j < renglones; ++j) 
+						{
+							partida >> simbolos;
+							Mapa_De_Partida[i].push_back(simbolos);
+						
+						}
+					
+					}
+				
+				}
+			
+				Mapa_De_Partida = Copia_nivel;
+
+				std::cout << "se logro cargar la partida con exito " << std::endl;
+			
+				partida.close();
 			}
-			else 
+			else
 			{
-				std::cout << "algo sailo mal y o no tienes una partida aparte ";
+				std::cout << "algo sailo mal y o guardaste la partida ( el juego lo hacer automaticamente cuando ingrecas el commando "<<std::endl<<"---> 'fin' ";
 			}
-		
-		
+
+
 		}
 		else if (comando == "ayuda" || comando == "Ayuda") // original mente esto era un troll face pero  cuando insertaba el troll face solo saila ? en vez de los caracteres que conformaban la cara
 		{
-			es(1);
+			extra_line(1);
 			Instrucciones();
-			es(1);
+			extra_line(1);
 			//std::cout << "° <|°_°|> °" << std::endl;
 			//std::cout << "_°_/ | \_°_" << std::endl;
 			//std::cout << "  _°0|0°_  " << std::endl;
@@ -676,7 +755,7 @@ int main()
 			//std::cout << "_   °0°  _ " << std::endl;
 			//std::cout << " |°|_0_|°| " << std::endl;
 			//std::cout << "°°°°° te estoy viendo °°°°°°°°°°°°°°";
-			es(2);
+			extra_line(2);
 		}
 		else if (comando == "sana" || comando == "cura" || comando == "heal")
 		{
@@ -689,9 +768,13 @@ int main()
 		}
 		else// esto deberia indicar que ingresaste un comando que no reconose el juego 
 		{
-			es(3);
+			extra_line(2);
+			printf("-------------------------------------------------------------------");
+			extra_line(1);
 			printf(" --> No entiendo lo que me estas diciendo ingresa otro comando <-- ");
-			es(3);
+			extra_line(1);
+			printf("-------------------------------------------------------------------");
+			extra_line(2);
 		}
 		dibujar_mapa(Mi_Jugador.M_X, Mi_Jugador.M_Y, Copia_nivel, Mi_Jugador);
 		std::cout << std::endl;
@@ -717,5 +800,5 @@ int main()
 
 6) sistema de combate basado en tomar turnos
 
-7) que el juego pueda trasferir el jugador a un mapa a otro #valiendo brega 
+7) que el juego pueda trasferir el jugador a un mapa a otro #valiendo brega
 */
