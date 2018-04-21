@@ -5,6 +5,8 @@
 #include <fstream>
 #include <vector>
 #include <conio.h>
+#include <chrono>
+#include <thread>
 
 
 std::vector<std::vector<char>> Nivel_1 // uso estos vectores para dibujar los Nivels del juego este es el Primer piso 
@@ -52,7 +54,8 @@ std::vector<std::vector<char>> Nivel_3// esto es el trecer nivel
 std::vector<std::vector<char>> Test// para probar el fog of war del juego( y el juego en general ) 
 {
 	{ '1','2','3','4','5' },
-{ '#','E',' ',' ','#' },
+{ '1','2','#','k','K' },
+{ '#','E',' ',' ','!' },
 { '#','e',' ',' ','#' },
 { '#','#','#','#','#' },
 
@@ -104,6 +107,7 @@ std::vector<std::vector<bool> > visitados;// usar esto para revisar los cuartos 
 
 std::vector<std::vector<bool> > Enemigos_ubicacion; // estos vectores sirven para saber si ya visite a un enemigo en sierta parte del mapa 
 
+std::vector<std::vector<bool>> Tesoro;
 void extra_line(int x)
 {
 	for (int i = 0; i < x; ++i)
@@ -163,8 +167,26 @@ Jugador::~Jugador()
 }
 
 
+void DibujarCombate(std::vector<std::vector<char>> Figura_1, std::vector<std::vector<char>> Figura_2)
+{
+	extra_line(2);
 
-void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::vector<char>> Figura_2, Jugador &jugador, char tipo_enemigo) // esta funcion se encargara de dibujar los personajes que van estar en combate( possiblemente tambien los ataques ) 
+	for (int j = 0; j < Figura_1.size(); j++)
+	{
+		std::cout << std::endl;
+		for (int i = 0; i < Figura_1[j].size(); i++)
+		{
+			std::cout << Figura_1[j][i];
+		}
+		for (int l = 0; l < Figura_2[j].size(); l++)
+		{
+			std::cout << Figura_2[j][l];
+		}
+	}
+	extra_line(2);
+}
+
+void Combate(std::vector<std::vector<char>> Figura_1, std::vector<std::vector<char>> Figura_2, Jugador &jugador, char tipo_enemigo) // esta funcion se encargara de dibujar los personajes que van estar en combate( possiblemente tambien los ataques ) 
 {
 	Jugador Enemigo_Debil;// usare la clase del jugador para crear los enemigos del mismo jugador 
 
@@ -181,19 +203,9 @@ void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::v
 	bool enemigo_vivo = true;
 
 	// las dos figuras deberia ser del mismo tamaño
-	for (int j = 0; j < Figura_1.size(); j++)
-	{
-		std::cout << std::endl;
-		for (int i = 0; i < Figura_1[j].size(); i++)
-		{
-			std::cout << Figura_1[j][i];
-		}
-		for (int l = 0; l < Figura_2[j].size(); l++)
-		{
-			std::cout << Figura_2[j][l];
-		}
-	}
-	std::cout << std::endl;
+
+	DibujarCombate(Figura_1, Figura_2);
+	
 
 	switch (tipo_enemigo)
 	{
@@ -213,10 +225,14 @@ void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::v
 			if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
 			{
 				Enemigo_Debil.M_Vida -= jugador.M_Ataque;
-				std::cout << " Vida Oponente : " << Enemigo_Debil.M_Vida
-					<< std::endl;
+				if (Enemigo_Debil.M_Vida < 1) 
+				{
+					Enemigo_Debil.M_Vida = 0;
+				}
+
+				std::cout << " Vida Oponente : " << Enemigo_Debil.M_Vida<< std::endl;
 			}
-			else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal")
+			else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal" || Acciones_Batalla =="h" || Acciones_Batalla=="H")
 			{
 				if (jugador.M_Vida >= jugador.M_VidaMaxima)
 				{
@@ -232,7 +248,7 @@ void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::v
 			if (Enemigo_Debil.M_Vida < 1)
 			{
 				enemigo_vivo = false;
-				std::cout << "lo matastes men ";
+				std::cout << "lo matastes men "<<std::endl;
 			}
 			else
 			{
@@ -241,6 +257,7 @@ void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::v
 				std::cout << "tu vida es : " << jugador.M_Vida << std::endl;
 			}
 
+			DibujarCombate(Figura_1, Figura_2);
 		}
 		break;
 
@@ -260,10 +277,14 @@ void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::v
 			if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
 			{
 				Enemigo_fuerte.M_Vida -= jugador.M_Ataque;
+				if (Enemigo_fuerte.M_Vida < 1) 
+				{
+					Enemigo_fuerte.M_Vida = 0;
+				}
 				std::cout << " Vida Oponente : " << Enemigo_fuerte.M_Vida;
 				std::cout << std::endl;
 			}
-			else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal" || Acciones_Batalla == "cure" || Acciones_Batalla == "Heal" || Acciones_Batalla == "HEAL")
+			else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal" || Acciones_Batalla =="h" || Acciones_Batalla=="H")
 			{
 				if (jugador.M_Vida >= jugador.M_VidaMaxima)
 				{
@@ -287,7 +308,7 @@ void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::v
 				std::cout << " te golpean por " << Enemigo_fuerte.M_Ataque << " puntos de vida " << std::endl;
 				std::cout << "vida actual : " << jugador.M_Vida << std::endl;
 			}
-
+			DibujarCombate(Figura_1, Figura_2);
 		}
 
 	default:
@@ -296,6 +317,52 @@ void dibujar_combate(std::vector<std::vector<char>> Figura_1, std::vector<std::v
 
 }
 
+
+void Fortuna( Jugador &jugador,char X) 
+{
+	int reconpensa = 0;
+	srand(time(0));
+
+	extra_line(20);
+	reconpensa = rand();
+
+	switch (X) 
+	{
+	case '!':
+			if (reconpensa % 3 == 0) 
+			{
+				jugador.inventario.push_back("pocion");
+			}
+			else if (reconpensa % 3 == 1) 
+			{
+				jugador.inventario.push_back("contenedor_de_corazon");
+			
+			}
+			else if (reconpensa == 2) 
+			{
+				jugador.inventario.push_back("anime");
+			
+			}
+			std::cout << "tu has cosiguido tesoro "<<std::endl;
+			break;
+	
+	default:
+		break;
+	case'k':
+		jugador.inventario.push_back("llave");
+		std::cout<< "resibeste una llave ";
+		extra_line(2);
+		break;
+	case 'K':
+		jugador.inventario.push_back("llave");
+		std::cout << "resibeste una llave ";
+		extra_line(2);
+		break;
+
+
+	}
+		
+}
 
 void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &jugador)// los parametros de esta funcion son 2 int , vector de vectors de charcateres , y la class jugador 
 {
@@ -321,14 +388,51 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &j
 				simbolo_mapa = mapa[eje_y][eje_x];
 				Enemigos_ubicacion[eje_y][eje_x] = false;
 
-				dibujar_combate(Personaje_Jugador, personaje_2, jugador, simbolo_mapa);
+				Combate(Personaje_Jugador, personaje_2, jugador, simbolo_mapa);
 			}
-			else if (mapa[eje_y][eje_x] == 'E' && Enemigos_ubicacion[eje_y][eje_x] == true) // DEBERIA meterme en un combate con un enemigo fuerte 
+			else if (mapa[eje_y][eje_x] == 'E' && Enemigos_ubicacion[eje_y][eje_x] == true) //  meterme en un combate con un enemigo fuerte 
 			{
 				simbolo_mapa = mapa[eje_y][eje_x];
 				Enemigos_ubicacion[eje_y][eje_x] = false;
 
-				dibujar_combate(Personaje_Jugador, personaje_2, jugador, simbolo_mapa);
+				Combate(Personaje_Jugador, personaje_2, jugador, simbolo_mapa);
+			}
+			else if (mapa[eje_y][eje_x] == 'e' && Enemigos_ubicacion[eje_y][eje_x] == false)// para cuando un enemigo sea derotado intercambie su simbolo con una 'x' para indicar que esta muerto 
+			{
+				mapa[eje_y][eje_x] = 'x';
+			}
+			else if (mapa[eje_y][eje_x] == 'E' && Enemigos_ubicacion[eje_y][eje_x] == false)// para cuando un enemigo sea derotado intercambie su simbolo con una 'X' para indicar que esta muerto 
+			{
+				mapa[eje_y][eje_x] = 'X';
+
+			}
+			else if (mapa[eje_y][eje_x] == '!' && Tesoro[eje_y][eje_x] == true) 
+			{
+				Tesoro[eje_y][eje_x] = false;
+				simbolo_mapa = mapa[eje_y][eje_x];
+				Fortuna(jugador,simbolo_mapa);
+			}
+			else if (mapa[eje_y][eje_x] == 'k' && Tesoro[eje_y][eje_x] == true)
+			{
+				Tesoro[eje_y][eje_x] = false;
+				simbolo_mapa = mapa[eje_y][eje_x];
+				Fortuna(jugador, simbolo_mapa);
+			}
+			else if (mapa[eje_y][eje_x] == 'K' && Tesoro[eje_y][eje_x] == true)
+			{
+				Tesoro[eje_y][eje_x] = false;
+				simbolo_mapa = mapa[eje_y][eje_x];
+				Fortuna(jugador, simbolo_mapa);
+			}
+			else if (mapa[eje_y][eje_x] == 'K' && Tesoro[eje_y][eje_x] == false) // para indicar que la llave no esta ahi ( el jugador ahora la tiene )
+			{
+				mapa[eje_y][eje_x] = ' ';
+
+			}
+			else if (mapa[eje_y][eje_x] == 'k' && Tesoro[eje_y][eje_x] == false)// para indicar que la llave no esta ahi ( el jugador ahora la tiene )
+			{
+				mapa[eje_y][eje_x] = ' ';
+
 			}
 			else
 			{
@@ -405,7 +509,7 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &j
 				}
 				else
 				{
-					std::cout << ' ';
+					std::cout << '.';
 				}
 			}
 		}
@@ -423,7 +527,7 @@ void Instrucciones()
 		<< " e = enemigo debil " << std::endl
 		<< " E = enemigo fuerte" << std::endl
 		<< " k = llave " << std::endl
-		<< " # = puetas " << std::endl;
+		<< " # = puertas " << std::endl;
 	std::cout << "pos data DEJA DE VALER VERGA gracias ;)" << std::endl;
 }
 
@@ -433,8 +537,8 @@ void Guardar_Partida(Jugador &jugador, std::vector<std::vector<char>> mapa, std:
 {
 	std::ofstream file("partida.txt");
 
-	file << jugador.M_Nombre << ' ' << jugador.M_Ataque << ' ' << jugador.M_Vida << ' ' << jugador.M_X << ' ' << jugador.M_Y <<' '<< mapa.size()<<' '<<mapa[0].size()<< std::endl;
-
+	file << jugador.M_Nombre << ' ' << jugador.M_Ataque << ' ' << jugador.M_Vida << ' ' << jugador.M_X << ' ' << jugador.M_Y << ' ' << mapa.size() << ' ' << mapa[0].size() <<' '<< max_x <<' '<< max_y << std::endl;
+	
 	
 	for (int i = 0; i < mapa.size(); ++i)
 	{
@@ -449,7 +553,6 @@ void Guardar_Partida(Jugador &jugador, std::vector<std::vector<char>> mapa, std:
 			{
 				file << mapa[i][j];
 			}
-
 
 		}
 		file << std::endl;
@@ -471,6 +574,27 @@ void Guardar_Partida(Jugador &jugador, std::vector<std::vector<char>> mapa, std:
 
 		}
 		file << std::endl;
+	}
+
+	for (int i = 0; i < Enemigos_ubicacion.size(); ++i) 
+	{
+	
+		for (int j = 0; j < Enemigos_ubicacion[i].size(); ++j) 
+		{
+		
+			if (Enemigos_ubicacion[i][j] == true)
+			{
+				file << 't';
+			}
+			else
+			{
+				file << 'f';
+			}
+
+		
+		}
+		file << std::endl;
+	
 	}
 	file << '~';
 	file.close();
@@ -582,14 +706,34 @@ int main()
 				Mi_Jugador.M_X = i;
 				break;
 			}
+
 		}
+	}
+
+	for (int j = 0; j < Copia_nivel.size(); ++j) 
+	{
+		Tesoro.push_back({});
+	
+		for (int i = 0; i < Copia_nivel[j].size(); ++i) 
+		{
+		
+			if (Copia_nivel[j][i] == '!' || Copia_nivel[j][i]=='K' || Copia_nivel[j][i]=='k') 
+			{
+				Tesoro[j].push_back(true);
+			}
+			else
+			{
+				Tesoro[j].push_back(false);
+			}
+		}
+	
 	}
 
 	dibujar_mapa(Mi_Jugador.M_X, Mi_Jugador.M_Y, Copia_nivel, Mi_Jugador);
 
 	while (Juego_Activo == true)
 	{
-		std::cout << " dime lo que quieres hacer \n";
+		std::cout <<std::endl<<" dime lo que quieres hacer \n";
 		std::cin >> comando;
 
 		if (comando == "N" || comando == "n" || comando == "norte" || comando == "Norte")// encargado del movimiento y que el jugador no se salga de las bareras del juego 
@@ -669,33 +813,16 @@ int main()
 		else if (comando == "cargar" || comando == "CARGAR" || comando == "Cargar")
 		{
 
+			/*
+			faltan mas cosas que cargar en la partida 
+
+			 los limites de los niveles los enemigos mierda del inventario 
+			*/
+
 			std::ifstream partida("partida.txt");
 
-			if (partida.is_open())
+			if (partida.is_open())// crea una funion que aga lo mismo 
 			{
-				// lo que dice file es solo para referencia 
-				//file << jugador.M_Nombre << ' ' << jugador.M_Ataque << ' ' << jugador.M_Vida << ' ' << jugador.M_X << ' ' << jugador.M_Y;
-
-				//for (int i = 0; i < visibilidad_mapa.size(); ++i) 
-				//{
-				//	for (int j = 0; j < visibilidad_mapa[i].size(); ++j) 
-				//	{
-				//		file << visibilidad_mapa[i][j];
-				//	}
-				//	file << std::endl;
-				//}
-
-				//for (int i = 0; i<mapa.size(); ++i)
-				//{
-				//	file<< mapa.size();
-				//	
-				//	for (int j = 0; j < mapa[i].size(); ++j)
-				//	{
-				//		file << mapa[i][j];
-				//
-				//	}
-				//	file << ' ' << std::endl;
-				//}
 
 				char simbolos = ' ';
 
@@ -703,18 +830,14 @@ int main()
 
 				int columnas = 0;
 
-				int determinador_True_Flase = 0;
-
 				bool valor_binario = false;
-
-				bool verificado = false;
 
 				std::vector<std::vector<char>> Mapa_De_Partida;
 
 				std::vector<std::vector<bool>> map_valores_binario;
 
 
-				partida >> Mi_Jugador.M_Nombre >> Mi_Jugador.M_Ataque >> Mi_Jugador.M_Vida >> Mi_Jugador.M_X >> Mi_Jugador.M_Y>>columnas>>renglones;
+				partida >> Mi_Jugador.M_Nombre >> Mi_Jugador.M_Ataque >> Mi_Jugador.M_Vida >> Mi_Jugador.M_X >> Mi_Jugador.M_Y>>columnas>>renglones>>max_x>>max_y;
 
 				for (int i = 0; i < columnas; ++i)
 				{
@@ -735,7 +858,14 @@ int main()
 					for (int j = 1; j < renglones; ++j) 
 					{
 						partida >> simbolos;
-						Mapa_De_Partida[0].push_back(simbolos);
+						if (simbolos == '.') 
+						{
+							Mapa_De_Partida[0].push_back(' ');
+						}
+						else
+						{
+							Mapa_De_Partida[0].push_back(simbolos);
+						}
 						
 					}
 						
@@ -746,9 +876,15 @@ int main()
 						for (int j = 0; j < renglones; ++j) 
 						{
 							partida >> simbolos;
+							if (simbolos == '.')
+							{
+								Mapa_De_Partida[i].push_back(' ');
+							}
+							else
+							{
 								Mapa_De_Partida[i].push_back(simbolos);
-							
-							
+							}
+
 						}
 
 					}
@@ -774,60 +910,36 @@ int main()
 
 					}
 
-
-				}// aqui termina el while 
-
-				//Copia_nivel.clear();
-				//Copia_nivel.push_back({});
-				
-				//for (int i = 0; i < columnas; ++i)
-				//{
-				//
-				//	for (int j = 0; j < renglones; ++j)
-				//	{
-				//		partida >> simbolos;
-				//		Mapa_De_Partida[i].push_back(simbolos);
-				//
-				//	}
-				//
-				//}
-				//
-				//
-				//
-				//partida >> columnas;
-				//
-				//for (int i = 0; i < columnas; ++i)
-				//{
-				//	map_valores_binario.push_back({});
-				//}
-				//
-				//partida >> renglones;
-				//simbolos = ' ';
-
-				
-				
-
-
-				/*for (int i = 0; i < columnas; ++i)
-				{
-
-					for (int j = 0; j < renglones; ++j)
+					Enemigos_ubicacion.clear();// esto esta aqui por si el caso que el jugador desa cargar una partida cuando esta jugado otra 
+					for (int i = 0; i < columnas; ++i) 
 					{
-						partida >> simbolos;
-
-						if (simbolos == 'f')
-						{
-							valor_binario = false;
-						}
-						else
-						{
-							valor_binario = true;
-						}
-						map_valores_binario[i].push_back(valor_binario);
+						Enemigos_ubicacion.push_back({});
 
 					}
 
-				}*/
+					for (int i = 0; i < columnas; ++i)
+					{
+
+						for (int j = 0; j < renglones; ++j)
+						{
+							partida >> simbolos;
+
+							if (simbolos == 'f')
+							{
+								valor_binario = false;
+							}
+							else
+							{
+								valor_binario = true;
+							}
+							Enemigos_ubicacion[i].push_back(valor_binario);
+
+						}
+
+					}
+
+
+				}// aqui termina el while 
 
 
 				visitados = map_valores_binario;
@@ -840,9 +952,8 @@ int main()
 			}
 			else
 			{
-				std::cout << "algo sailo mal y o guardaste la partida ( el juego lo hacer automaticamente cuando ingrecas el commando " << std::endl << "---> 'fin' ";
+				std::cout << "algo sailo mal y o no guardaste la partida ( el juego lo hacer automaticamente cuando ingrecas el commando " << std::endl << "---> 'fin' ";
 			}
-
 
 		}
 		else if (comando == "ayuda" || comando == "Ayuda" || comando == "AYUDA") // original mente esto era un troll face pero  cuando insertaba el troll face solo saila '?' en vez de los caracteres que conformaban la cara del troll
@@ -857,6 +968,17 @@ int main()
 			//std::cout << " |°|_0_|°| " << std::endl;
 			//std::cout << "°°°°° te estoy viendo °°°°°°°°°°°°°°";
 			extra_line(2);
+		}
+		else if (comando == "int" || comando=="Int" || comando=="inventario" || comando=="stuff" ||comando=="cosas") 
+		{
+			std::cout << "tienes :";
+			for (int i = 0; i < Mi_Jugador.inventario.size(); ++i) 
+			{
+			 std::cout<< Mi_Jugador.inventario[i] << ',';
+		
+
+			}
+		
 		}
 		else if (comando == "sana" || comando == "cura" || comando == "heal")
 		{

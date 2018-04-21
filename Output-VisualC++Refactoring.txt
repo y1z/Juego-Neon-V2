@@ -1,0 +1,6 @@
+﻿
+Renamed 'dibujar_combate' to 'Combate':
+---------------------------------------
+c:\Users\Y. Barraza\Documents\Aventura_neon\Juego-de-texto_NEON\Aventuras neon\main.cpp(169, 6)
+c:\Users\Y. Barraza\Documents\Aventura_neon\Juego-de-texto_NEON\Aventuras neon\main.cpp(326, 5)
+c:\Users\Y. Barraza\Documents\Aventura_neon\Juego-de-texto_NEON\Aventuras neon\main.cpp(333, 5)

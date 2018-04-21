@@ -1,10 +1,14 @@
-hjdjfdsa 2 10 4 0 4 5
+ejdf 2 6 4 3 4 5 5 4
 12345
-#E..#
+#X..#
 #e..#
 #####
-ffftt
+ttttt
+ttttt
+ttttt
 ftttt
-ftttt
-ftttt
+fffff
+fffff
+ftfff
+fffff
 ~
