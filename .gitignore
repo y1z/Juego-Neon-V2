@@ -5,3 +5,7 @@
 
 *.ipch
 .vs/*
+*.log
+*.idb
+*.obj
+*.ilk
