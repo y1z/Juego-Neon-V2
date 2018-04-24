@@ -54,9 +54,9 @@ std::vector<std::vector<char>> Nivel_3// esto es el trecer nivel
 std::vector<std::vector<char>> Test// para probar el fog of war del juego( y el juego en general ) 
 {
 	{ '1','2','3','4','5' },
-{ '1','2','#','k','K' },
+{ '1','2','!','!','!' },
 { '#','E',' ',' ','!' },
-{ '#','e',' ',' ','#' },
+{ '#','e',' ',' ','!' },
 { '#','#','#','#','#' },
 
 };
@@ -329,16 +329,18 @@ void Fortuna( Jugador &jugador,char X)
 	switch (X) 
 	{
 	case '!':
+
+
 			if (reconpensa % 3 == 0) 
 			{
 				jugador.inventario.push_back("pocion");
 			}
 			else if (reconpensa % 3 == 1) 
 			{
-				jugador.inventario.push_back("contenedor_de_corazon");
+				jugador.inventario.push_back("contenedor de corazon");
 			
 			}
-			else if (reconpensa == 2) 
+			else if (reconpensa % 3 == 2) 
 			{
 				jugador.inventario.push_back("anime");
 			
@@ -346,8 +348,7 @@ void Fortuna( Jugador &jugador,char X)
 			std::cout << "tu has cosiguido tesoro "<<std::endl;
 			break;
 	
-	default:
-		break;
+
 	case'k':
 		jugador.inventario.push_back("llave");
 		std::cout<< "resibeste una llave ";
@@ -359,7 +360,8 @@ void Fortuna( Jugador &jugador,char X)
 		extra_line(2);
 		break;
 
-
+	default:
+		break;
 	}
 		
 }
@@ -371,10 +373,10 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &j
 
 	char simbolo_mapa;
 
-	for (int j = 0; j < mapa.size(); j++)
+	for (int j = 0; j < mapa.size(); ++j)
 	{
 		std::cout << '\n';
-		for (int i = 0; i < mapa[j].size(); i++)
+		for (int i = 0; i < mapa[j].size(); ++i)
 		{
 			//;// se convierte en el character que esta en la posicion del mapa actual 
 
@@ -521,14 +523,16 @@ void Instrucciones()
 
 	std::cout << std::endl << "te puedes mover con las teclar 'n' , 's', 'e','o' y 'w' , las teclas 'w' y 'o' hacen lo mismo " << std::endl;
 	std::cout << "otras comandos que puedes hacer tambien son 'nav', para ver tus estadisticas [nombre] [ataque] [vida] en es orden , 'fin' para sailr del juego " << std::endl;
-	std::cout << " 'ayuda' para ver un consejo que talvez te ayude , tambien esta el comando 'guardar', 'save'( hacen los mismo )para " << std::endl << "guardar la partida del juego." << std::endl << " aqui esta la lista de que simbolo que se usan para representar visualmente todo del juego " << std::endl;
-	std::cout << " @ = tu personaje " << std::endl
+	std::cout << " 'ayuda' para ver un consejo que talvez te ayude , tambien esta el comando 'guardar', 'save'( hacen los mismo )para " << std::endl << "guardar la partida del juego." <<std::endl<<"usa la 'i' para ver tu inventario "<< std::endl << " aqui esta la lista de que simbolo que se usan para representar visualmente todo del juego " << std::endl;
+	std::cout << " @ = tu personaje " << '\t'
 		<< " * = Una pared (no puedes atravesarlas )" << std::endl
-		<< " e = enemigo debil " << std::endl
+		<< " e = enemigo debil " << '\t'
 		<< " E = enemigo fuerte" << std::endl
-		<< " k = llave " << std::endl
+		<< " k = llave " << '\t'
 		<< " # = puertas " << std::endl;
-	std::cout << "pos data DEJA DE VALER VERGA gracias ;)" << std::endl;
+	std::cout << "pos data DEJA DE VALER MADRE gracias ;)" << std::endl;
+
+	stop();
 }
 
 
@@ -601,11 +605,122 @@ void Guardar_Partida(Jugador &jugador, std::vector<std::vector<char>> mapa, std:
 
 }
 
+void Nuevo_Nivel(std::vector<std::vector<char>> &MapaReferencia, Jugador &jugador, std::vector<std::vector<char>> &MapaAfectado)
+{
+	int nuevo_max_x =0;
+	int nuevo_max_y =0;
+
+	if (MapaReferencia == Nivel_1 || MapaReferencia == Nivel_2 || MapaReferencia == Nivel_3) 
+	{
+		if (MapaReferencia == Nivel_1) {
+		MapaReferencia = Nivel_2;
+		MapaAfectado = Nivel_2;
+		}
+		else if (MapaReferencia == Nivel_2) 
+		{
+			MapaReferencia = Nivel_3;
+			MapaAfectado = Nivel_3;
+		}
+	
+		for (int i = 0; i < MapaReferencia.size(); ++i) // este for es para crear los bordes de los mapas para no sailrse de ellos 
+		{
+
+			if (nuevo_max_x < MapaAfectado[i].size())
+			{
+				nuevo_max_x = MapaAfectado[i].size();
+			}
+			++nuevo_max_y;
+
+		}
+		max_x = nuevo_max_x;
+		max_y = nuevo_max_y;
+
+		visitados.clear();
+
+		for (int j = 0; j < MapaReferencia.size(); ++j)// crear un vector vacio 
+		{
+			visitados.push_back({});
+
+			for (int i = 0; i < max_x; ++i)// Inicializar las posiciones como no vististadas o false 
+			{
+				visitados[j].push_back(false);
+			}
+		}
+		Enemigos_ubicacion.clear();
+
+		for (int j = 0; j < MapaReferencia.size(); ++j)
+		{
+			Enemigos_ubicacion.push_back({});
+
+			for (int i = 0; i < max_x; ++i)
+			{
+				if (MapaReferencia[j][i] == 'e')
+				{
+					Enemigos_ubicacion[j].push_back(true);
+				}
+				else if (MapaReferencia[j][i] == 'E')
+				{
+					Enemigos_ubicacion[j].push_back(true);
+				}
+				else
+				{
+					Enemigos_ubicacion[j].push_back(false);
+				}
+			}
+		}
+		for (int j = 0; j < MapaReferencia.size(); ++j)
+		{
+			for (int i = 0; i < MapaReferencia[j].size(); ++i)
+			{
+				if (MapaReferencia[j][i] == 'S')
+				{
+					jugador.M_Y = j;
+					jugador.M_X = i;
+					break;
+				}
+
+			}
+		}
+
+		Tesoro.clear();
+
+		for (int j = 0; j < MapaReferencia.size(); ++j)
+		{
+			Tesoro.push_back({});
+
+			for (int i = 0; i < MapaReferencia[j].size(); ++i)
+			{
+
+				if (MapaReferencia[j][i] == '!' || MapaReferencia[j][i] == 'K' || MapaReferencia[j][i] == 'k')
+				{
+					Tesoro[j].push_back(true);
+				}
+				else
+				{
+					Tesoro[j].push_back(false);
+				}
+			}
+
+		}
+	}
+	else 
+	{
+		std::cout << "falta algo ";
+	
+	}
+
+
+}
+
+
 // funcion main  
 int main()
 {
 
-	//stop();
+	//stop();	
+	std::vector<std::vector<char>> MapaOriginal;
+
+
 	std::vector<std::vector<char>> Copia_nivel;
 
 	Jugador Mi_Jugador;
@@ -628,18 +743,22 @@ int main()
 	if (comando == "1")
 	{
 		Copia_nivel = Nivel_1;
+		MapaOriginal = Nivel_1;
 	}
 	else if (comando == "2")
 	{
 		Copia_nivel = Nivel_2;
+		MapaOriginal = Nivel_2;
 	}
 	else if (comando == "3")
 	{
 		Copia_nivel = Nivel_3;
+		MapaOriginal = Nivel_3;
 	}
 	else if (comando == "p")
 	{
 		Copia_nivel = Test;
+		MapaOriginal = Test;
 	}
 	else
 	{
@@ -665,7 +784,6 @@ int main()
 	Mi_Jugador.M_X = 2;
 	Mi_Jugador.M_Y = 2;
 
-	visitados.reserve(6);
 
 	for (int j = 0; j < Copia_nivel.size(); ++j)// crear un vector vacio 
 	{
@@ -808,6 +926,58 @@ int main()
 		else if (comando == "guardar" || comando == "Guardar" || comando == "GUARDAR" || comando == "gardar" || comando == "Gardar" || comando == "save" || comando == "SAVE" || comando == "Save")
 		{
 			Guardar_Partida(Mi_Jugador, Copia_nivel, visitados);
+
+		}
+		else if (comando == "z")
+		{
+			Nuevo_Nivel(MapaOriginal , Mi_Jugador, Copia_nivel);
+		}
+		else if (comando == "usar")
+		{
+			std::string ObjetoDesiado;
+			int cantidad = 0;
+
+			/*
+			"pocion"
+			"contenedor de corazon"
+			"anime"
+			*/
+
+			for (int i = 0; i < Mi_Jugador.inventario.size(); ++i) 
+			{
+				if (Mi_Jugador.inventario[i] == "anime") 
+				{
+					++cantidad;
+				}
+			
+			}
+			std::cout << "Tienes : " << cantidad << " anime, ";
+			cantidad = 0;
+
+			for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+			{
+				if (Mi_Jugador.inventario[i] == "contenedor de corazon")
+				{
+					++cantidad;
+				}
+
+			}
+			std::cout << cantidad << " contenedor de corazones, ";
+			cantidad = 0;
+
+			for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+			{
+				if (Mi_Jugador.inventario[i] == "pocion")
+				{
+					++cantidad;
+				}
+
+			}
+			std::cout << cantidad << " pocion, ";
+			cantidad = 0;
+			std::cout << " para usar preciona las numeros debajo del objeto que quieras usar " << std::endl << "	[1]		[2]		      [3]"<<std::endl;
+			
+			
 
 		}
 		else if (comando == "cargar" || comando == "CARGAR" || comando == "Cargar")
@@ -969,7 +1139,7 @@ int main()
 			//std::cout << "°°°°° te estoy viendo °°°°°°°°°°°°°°";
 			extra_line(2);
 		}
-		else if (comando == "int" || comando=="Int" || comando=="inventario" || comando=="stuff" ||comando=="cosas") 
+		else if (comando == "int" || comando=="Int"|| comando=="inventario" || comando=="stuff" ||comando=="cosas"||comando=="i" ||comando=="I") 
 		{
 			std::cout << "tienes :";
 			for (int i = 0; i < Mi_Jugador.inventario.size(); ++i) 

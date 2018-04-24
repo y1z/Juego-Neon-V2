@@ -1,14 +1,20 @@
-ejdf 2 6 4 3 4 5 5 4
-12345
-#X..#
-#e..#
-#####
-ttttt
-ttttt
-ttttt
-ftttt
-fffff
-fffff
-ftfff
-fffff
+d 2 10 7 0 6 8 8 6
+B......!
+...*!e..
+...**!e.
+.....*..
+!!*...*.
+!!*....S
+fffffttt
+fffffttt
+fffffttt
+fffffftt
+fffffftt
+fffffftt
+ffffffff
+ffffftff
+fffffftf
+ffffffff
+ffffffff
+ffffffff
 ~
