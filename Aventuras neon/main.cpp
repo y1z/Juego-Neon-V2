@@ -8,6 +8,34 @@
 #include <chrono>
 #include <thread>
 
+std::vector<std::vector<char>> MapaOriginal;
+
+bool Juego_Activo = true;
+
+int Salida_X;
+int Salida_Y;
+
+int max_x = 7;
+int max_y = 8;
+
+int Jefe_X;
+int Jefe_Y;
+
+int JefeFinal_X;
+int JefeFinal_Y;
+
+std::vector<std::vector<bool> > visitados;// usar esto para revisar los cuartos que visite
+
+std::vector<std::vector<bool> > Enemigos_ubicacion; // estos vectores sirven para saber si ya visite a un enemigo en sierta parte del mapa 
+
+std::vector<std::vector<bool>> Tesoro;
+
+std::vector<std::vector<char>> salida;
+
+std::vector<std::vector<bool>> Puertas;
+
+std::vector<std::vector<bool>> UbicacionJefe;
+
 
 std::vector<std::vector<char>> Nivel_1 // uso estos vectores para dibujar los Nivels del juego este es el Primer piso 
 {
@@ -15,7 +43,7 @@ std::vector<std::vector<char>> Nivel_1 // uso estos vectores para dibujar los Ni
 	{ '*', '*', '*', '!', '*', 'K' },
 { 'F', '#', ' ', 'b', ' ', ' ' },
 { '*', '*', 'k', ' ', '*', '!' },
-{ 'k', ' ', ' ', ' ', ' ', ' ' },
+{ 'k', ' ', ' ', ' ', ' ', '*' },
 { 'E', ' ', ' ', ' ', '#', '!' },
 { ' ', ' ', '#', ' ', ' ', '*' },
 { ' ', '*', '!', '*', 'e', '*' },
@@ -33,9 +61,9 @@ std::vector<std::vector<char>> Nivel_2// esto es el segundo nivel
 { '*',' ',' ','*','!',' ','*','k','*' },
 { '!','#',' ','*','!',' ','!','*','*' },
 { '!','e',' ',' ','*',' ',' ',' ','*' },
-{ '*',' ','#','!','>',' ',' ','!','*' },
+{ '*',' ','#','!','#',' ',' ','!','*' },
 { '!','E',' ','*','*','*','*','b','!' },
-{ '*',' ',' ','#',' ',' ','!','!','f' }
+{ '*',' ',' ','#',' ',' ','!','!','F' }
 
 };
 
@@ -47,7 +75,7 @@ std::vector<std::vector<char>> Nivel_3// esto es el trecer nivel
 { ' ',' ',' ','*','*','!','e',' ' },
 { ' ',' ',' ',' ',' ','*',' ',' ' },
 { '!','!','*',' ',' ',' ','*',' ' },
-{ '!','!','*',' ',' ',' ',' ','S' }
+{ '!','!','*',' ',' ',' ','S',' ' }
 
 };
 
@@ -97,17 +125,43 @@ std::vector<std::vector<char>> personaje_2
 
 };
 
-bool Juego_Activo = true;
+std::vector<std::vector<char>> Boss
+{
+
+	{ '\t',' ',' ',' ',' ',' ', ' ' },
+{ '\t',' ',' ','#','#',' ', ' ' },
+{ '\t',' ','^','|','|','^', ' ' },
+{ '\t',' ',' ','|','|',' ', ' ' },
+{ '\t',' ','\\',' ',' ','/', ' ' },
+{ '\t',' ',' ','-','-',' ', ' ' },
+{ '\t',' ',' ',' ',' ',' ', ' ' },
+{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+
+};
+
+std::vector<std::vector<char>> Boss_Final
+{
+
+	{ '\t',' ',' ',' ',' ',' ', ' ' },
+	{ '\t','0','|','^','|','0', ' ' },
+	{ '\t',' ','^','|','^','^', ' ' },
+	{ '\t','~',' ','|',' ','~', ' ' },
+	{ '\t',' ','#',' ','#','*', ' '},
+	{ '\t',' ',' ','-','*',' ', '*' },
+	{ '\t',' ','°','°','°','*', ' ' },
+	{ '\t',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+	{ '\t','°','°','°','°','°','?','?','?','°',' ' },
+	{ '\t','*',' ',' ','/','0','\\',' ',' ','*',' ' },
+	{ '\t',' ','*',' ','\\',' ','/',' ','*',' ',' ' },
+	{ '\t',' ',' ','*','*','*','*','*',' ',' ',' ' },
+
+};// |°|_0_|°|
 
 
-int max_x = 7;
-int max_y = 8;
-
-std::vector<std::vector<bool> > visitados;// usar esto para revisar los cuartos que visite
-
-std::vector<std::vector<bool> > Enemigos_ubicacion; // estos vectores sirven para saber si ya visite a un enemigo en sierta parte del mapa 
-
-std::vector<std::vector<bool>> Tesoro;
 void extra_line(int x)
 {
 	for (int i = 0; i < x; ++i)
@@ -198,6 +252,14 @@ void Combate(std::vector<std::vector<char>> Figura_1, std::vector<std::vector<ch
 	Enemigo_fuerte.M_Ataque = 2;
 	Enemigo_fuerte.M_Vida = 5;
 
+	Jugador Jefe;
+	Jefe.M_Vida = 12;
+	Jefe.M_Ataque = 2;
+
+	Jugador El_mamietor;// jefe final 
+	El_mamietor.M_Vida = 18;
+	Jefe.M_Ataque = 4;
+
 	std::string Acciones_Batalla;
 
 	bool enemigo_vivo = true;
@@ -221,6 +283,15 @@ void Combate(std::vector<std::vector<char>> Figura_1, std::vector<std::vector<ch
 			extra_line(3);
 
 			std::cin >> Acciones_Batalla;
+
+
+			if (jugador.M_Vida < 1)
+			{
+				enemigo_vivo = false;
+				Juego_Activo = false;
+				std::wcout << "tu perdiste men ";
+
+			}
 
 			if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
 			{
@@ -272,6 +343,14 @@ void Combate(std::vector<std::vector<char>> Figura_1, std::vector<std::vector<ch
 
 			extra_line(3);
 
+			if (jugador.M_Vida < 1)
+			{
+				enemigo_vivo = false;
+				Juego_Activo = false;
+				std::wcout << "tu perdiste men ";
+
+			}
+
 			std::cin >> Acciones_Batalla;
 
 			if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
@@ -310,6 +389,128 @@ void Combate(std::vector<std::vector<char>> Figura_1, std::vector<std::vector<ch
 			}
 			DibujarCombate(Figura_1, Figura_2);
 		}
+		break;
+	case 'b':
+		while (enemigo_vivo == true)
+		{
+			std::cout << " ?que vas hacer ?" << std::endl;
+			std::cout << " -------- -----  " << std::endl;
+			std::cout << "| ataque | heal |" << std::endl;
+			std::cout << " -------- -----  ";
+
+			extra_line(3);
+
+
+			if (jugador.M_Vida < 1)
+			{
+				enemigo_vivo = false;
+				Juego_Activo = false;
+				std::wcout << "tu perdiste men ";
+
+			}
+
+			std::cin >> Acciones_Batalla;
+
+			if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
+			{
+				Jefe.M_Vida -= jugador.M_Ataque;
+				if (Jefe.M_Vida < 1)
+				{
+					Jefe.M_Vida = 0;
+				}
+				std::cout << " Vida Oponente : " << Jefe.M_Vida;
+				std::cout << std::endl;
+			}
+			else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal" || Acciones_Batalla == "h" || Acciones_Batalla == "H")
+			{
+				if (jugador.M_Vida >= jugador.M_VidaMaxima)
+				{
+					std::cout << " no puedes sanar algo que no esta herido ";
+				}
+				else
+				{
+					jugador.M_Vida += 3;
+				}
+
+			}
+
+			if (Jefe.M_Vida < 1)
+			{
+				enemigo_vivo = false;
+				std::cout << "lo matastes men " << std::endl;
+			}
+			else
+			{
+				jugador.M_Vida -= Jefe.M_Ataque;
+				std::cout << " te golpean por " << Jefe.M_Ataque << " puntos de vida " << std::endl;
+				std::cout << "vida actual : " << jugador.M_Vida << std::endl;
+			}
+			DibujarCombate(Figura_1, Figura_2);
+		}//aqui termina el while 
+		break;
+
+	case'B':
+
+		while (enemigo_vivo == true)
+		{
+			std::cout << " ?que vas hacer ?" << std::endl;
+			std::cout << " -------- -----  " << std::endl;
+			std::cout << "| ataque | heal |" << std::endl;
+			std::cout << " -------- -----  ";
+
+			extra_line(3);
+
+			if (jugador.M_Vida < 1) 
+			{
+				enemigo_vivo = false;
+				Juego_Activo = false;
+				std::wcout << "tu perdiste men ";
+
+			}
+
+
+			std::cin >> Acciones_Batalla;
+
+			if (Acciones_Batalla == "ataque" || Acciones_Batalla == "Ataque" || Acciones_Batalla == "ATAQUE" || Acciones_Batalla == "a" || Acciones_Batalla == "A")
+			{
+				El_mamietor.M_Vida -= jugador.M_Ataque;
+				if (El_mamietor.M_Vida < 1)
+				{
+					El_mamietor.M_Vida = 0;
+				}
+				std::cout << " Vida Oponente : " << El_mamietor.M_Vida;
+				std::cout << std::endl;
+			}
+			else if (Acciones_Batalla == "Cure" || Acciones_Batalla == "heal" || Acciones_Batalla == "h" || Acciones_Batalla == "H")
+			{
+				if (jugador.M_Vida >= jugador.M_VidaMaxima)
+				{
+					std::cout << " no puedes sanar algo que no esta herido ";
+				}
+				else
+				{
+					jugador.M_Vida += 3;
+				}
+
+			}
+
+			if (El_mamietor.M_Vida < 1)
+			{
+				enemigo_vivo = false;
+				std::cout << "felicitaciones men ganastes " << std::endl << "creador : Yhaliff " << std::endl << "ahora perciona enter para terminar el programa ";
+				stop();
+				Juego_Activo = false;
+			}
+			else
+			{
+				jugador.M_Vida -= Jefe.M_Ataque;
+				std::cout << " te golpean por " << Jefe.M_Ataque << " puntos de vida " << std::endl;
+				std::cout << "vida actual : " << jugador.M_Vida << std::endl;
+			}
+			DibujarCombate(Figura_1, Figura_2);
+		}//aqui termina el while 
+		break;
+
 
 	default:
 		break;
@@ -337,7 +538,7 @@ void Fortuna( Jugador &jugador,char X)
 			}
 			else if (reconpensa % 3 == 1) 
 			{
-				jugador.inventario.push_back("contenedor de corazon");
+				jugador.inventario.push_back("contenedor_de_corazon");
 			
 			}
 			else if (reconpensa % 3 == 2) 
@@ -345,7 +546,8 @@ void Fortuna( Jugador &jugador,char X)
 				jugador.inventario.push_back("anime");
 			
 			}
-			std::cout << "tu has cosiguido tesoro "<<std::endl;
+			std::cout << "tu has cosiguido tesoro ";
+			extra_line(3);
 			break;
 	
 
@@ -366,11 +568,149 @@ void Fortuna( Jugador &jugador,char X)
 		
 }
 
+void NextNevel(std::vector<std::vector<char>> &MapaReferencia, Jugador &jugador, std::vector<std::vector<char>> &MapaAfectado)
+{
+	int nuevo_max_x = 0;
+	int nuevo_max_y = 0;
+
+	if (MapaReferencia == Nivel_1 || MapaReferencia == Nivel_2 || MapaReferencia == Nivel_3)
+	{
+		if (MapaReferencia == Nivel_1) 
+		{
+			MapaReferencia = Nivel_2;
+			MapaAfectado = Nivel_2;
+		}
+		else if (MapaReferencia == Nivel_2)
+		{
+			MapaReferencia = Nivel_3;
+			MapaAfectado = Nivel_3;
+		}
+
+		for (int i = 0; i < MapaReferencia.size(); ++i) // este for es para crear los bordes de los mapas para no sailrse de ellos 
+		{
+
+			if (nuevo_max_x < MapaAfectado[i].size())
+			{
+				nuevo_max_x = MapaAfectado[i].size();
+			}
+			++nuevo_max_y;
+
+		}
+		max_x = nuevo_max_x;
+		max_y = nuevo_max_y;
+
+		visitados.clear();
+
+		for (int j = 0; j < MapaReferencia.size(); ++j)// crear un vector vacio 
+		{
+			visitados.push_back({});
+
+			for (int i = 0; i < max_x; ++i)// Inicializar las posiciones como no vististadas o false 
+			{
+				visitados[j].push_back(false);
+			}
+		}
+		Enemigos_ubicacion.clear();
+
+		for (int j = 0; j < MapaReferencia.size(); ++j)
+		{
+			Enemigos_ubicacion.push_back({});
+
+			for (int i = 0; i < max_x; ++i)
+			{
+				if (MapaReferencia[j][i] == 'e')
+				{
+					Enemigos_ubicacion[j].push_back(true);
+				}
+				else if (MapaReferencia[j][i] == 'E')
+				{
+					Enemigos_ubicacion[j].push_back(true);
+				}
+				else
+				{
+					Enemigos_ubicacion[j].push_back(false);
+				}
+			}
+		}
+		for (int j = 0; j < MapaReferencia.size(); ++j)
+		{
+			for (int i = 0; i < MapaReferencia[j].size(); ++i)
+			{
+				if (MapaReferencia[j][i] == 'S')
+				{
+					jugador.M_Y = j;
+					jugador.M_X = i;
+					break;
+				}
+			}
+		}
+
+		for (int j = 0; j < MapaReferencia.size(); ++j) 
+		{
+			for (int i = 0; i < MapaReferencia[j].size(); ++i) 
+			{
+				if (MapaReferencia[j][i] == 'F') 
+				{
+					Salida_Y = j;
+					Salida_X = i;
+				}
+			}
+		
+		}
+
+		Tesoro.clear();
+
+		for (int j = 0; j < MapaReferencia.size(); ++j)
+		{
+			Tesoro.push_back({});
+
+			for (int i = 0; i < MapaReferencia[j].size(); ++i)
+			{
+
+				if (MapaReferencia[j][i] == '!' || MapaReferencia[j][i] == 'K' || MapaReferencia[j][i] == 'k')
+				{
+					Tesoro[j].push_back(true);
+				}
+				else
+				{
+					Tesoro[j].push_back(false);
+				}
+			}
+		}
+		UbicacionJefe.clear();
+		for (int j = 0; j < MapaReferencia.size(); ++j)
+		{
+			UbicacionJefe.push_back({});
+
+			for (int i = 0; i < MapaReferencia[j].size(); ++i)
+			{
+
+				if (MapaReferencia[j][i] == 'b' || MapaReferencia[j][i] == 'B')
+				{
+					UbicacionJefe[j].push_back(true);
+				}
+				else
+				{
+					UbicacionJefe[j].push_back(false);
+				}
+			}
+		}
+
+
+	}
+	else
+	{
+		std::cout << "falta algo ";
+
+	}
+
+
+}
+
 void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &jugador)// los parametros de esta funcion son 2 int , vector de vectors de charcateres , y la class jugador 
 {
 	int eje_x = x;
 	int eje_y = y;
-
 	char simbolo_mapa;
 
 	for (int j = 0; j < mapa.size(); ++j)
@@ -398,6 +738,30 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &j
 				Enemigos_ubicacion[eje_y][eje_x] = false;
 
 				Combate(Personaje_Jugador, personaje_2, jugador, simbolo_mapa);
+			}
+			else if (mapa[eje_y][eje_x] == 'b'&& UbicacionJefe[eje_y][eje_x] == true)
+			{
+				simbolo_mapa = mapa[eje_y][eje_x];
+				UbicacionJefe[eje_y][eje_x] = false;
+
+				Combate(Personaje_Jugador, Boss, jugador, simbolo_mapa);
+
+			}
+			else if (mapa[eje_y][eje_x] == 'B'&& UbicacionJefe[eje_y][eje_x] == true)
+			{
+				simbolo_mapa = mapa[eje_y][eje_x];
+				UbicacionJefe[eje_y][eje_x] = false;
+
+				Combate(Personaje_Jugador, Boss, jugador, simbolo_mapa);
+
+			}
+			else if (mapa[eje_y][eje_x] == 'b'&& UbicacionJefe[eje_y][eje_x] == false)
+			{
+				mapa[eje_y][eje_x] = 'x';
+			}
+			else if (mapa[eje_y][eje_x] == 'B'&& UbicacionJefe[eje_y][eje_x] == false)
+			{
+				mapa[eje_y][eje_x] = 'X';
 			}
 			else if (mapa[eje_y][eje_x] == 'e' && Enemigos_ubicacion[eje_y][eje_x] == false)// para cuando un enemigo sea derotado intercambie su simbolo con una 'x' para indicar que esta muerto 
 			{
@@ -429,12 +793,14 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &j
 			else if (mapa[eje_y][eje_x] == 'K' && Tesoro[eje_y][eje_x] == false) // para indicar que la llave no esta ahi ( el jugador ahora la tiene )
 			{
 				mapa[eje_y][eje_x] = ' ';
-
 			}
 			else if (mapa[eje_y][eje_x] == 'k' && Tesoro[eje_y][eje_x] == false)// para indicar que la llave no esta ahi ( el jugador ahora la tiene )
 			{
 				mapa[eje_y][eje_x] = ' ';
-
+			}
+			else if (mapa[eje_y][eje_x] == '!' &&Tesoro[eje_y][eje_x] == false) //para cuando consigas algun tesoro 
+			{
+				mapa[eje_y][eje_x] = ' ';
 			}
 			else
 			{
@@ -520,10 +886,10 @@ void dibujar_mapa(int x, int y, std::vector<std::vector<char>> &mapa, Jugador &j
 	// aqui abajo estan los Instrucciones del juego 
 void Instrucciones()
 {
-
 	std::cout << std::endl << "te puedes mover con las teclar 'n' , 's', 'e','o' y 'w' , las teclas 'w' y 'o' hacen lo mismo " << std::endl;
 	std::cout << "otras comandos que puedes hacer tambien son 'nav', para ver tus estadisticas [nombre] [ataque] [vida] en es orden , 'fin' para sailr del juego " << std::endl;
-	std::cout << " 'ayuda' para ver un consejo que talvez te ayude , tambien esta el comando 'guardar', 'save'( hacen los mismo )para " << std::endl << "guardar la partida del juego." <<std::endl<<"usa la 'i' para ver tu inventario "<< std::endl << " aqui esta la lista de que simbolo que se usan para representar visualmente todo del juego " << std::endl;
+	std::cout << " 'ayuda' para ver estas intrucciones de nuevo , tambien esta el comando 'guardar', 'save'( hacen los mismo )para " << std::endl << "guardar la partida del juego." <<
+		std::endl<<"usa la 'i' para ver tu inventario y el comando 'usar' para usar lo que esta en tu inventario "<< std::endl << " aqui esta la lista de que simbolo que se usan para representar visualmente todo del juego " << std::endl;
 	std::cout << " @ = tu personaje " << '\t'
 		<< " * = Una pared (no puedes atravesarlas )" << std::endl
 		<< " e = enemigo debil " << '\t'
@@ -541,7 +907,7 @@ void Guardar_Partida(Jugador &jugador, std::vector<std::vector<char>> mapa, std:
 {
 	std::ofstream file("partida.txt");
 
-	file << jugador.M_Nombre << ' ' << jugador.M_Ataque << ' ' << jugador.M_Vida << ' ' << jugador.M_X << ' ' << jugador.M_Y << ' ' << mapa.size() << ' ' << mapa[0].size() <<' '<< max_x <<' '<< max_y << std::endl;
+	file << jugador.M_Nombre << ' ' << jugador.M_Ataque << ' ' << jugador.M_Vida << ' ' << jugador.M_X << ' ' << jugador.M_Y << ' ' << mapa.size() << ' ' << mapa[0].size() <<' '<< max_x <<' '<< max_y <<' '<<Salida_X<<' '<<Salida_Y<< std::endl;
 	
 	
 	for (int i = 0; i < mapa.size(); ++i)
@@ -594,133 +960,212 @@ void Guardar_Partida(Jugador &jugador, std::vector<std::vector<char>> mapa, std:
 			{
 				file << 'f';
 			}
-
-		
 		}
 		file << std::endl;
+	}
+	for (int j = 0; j < Tesoro.size(); ++j) 
+	{
+		for (int i = 0; i < Tesoro[j].size(); ++i) 
+		{
+			if (Tesoro[j][i] == true) 
+			{
+				file << 't';
+			}
+			else
+			{
+				file << 'f';
+			}
+
+		}
+		file << std::endl;
+	}
+	for (int j = 0; j < Puertas.size(); ++j) 
+	{
+	
+		for(int i =0; i < Puertas[j].size(); ++i)
+		{
+			if (Puertas[j][i] == true) 
+			{
+				file << 't';
+			}
+			else
+			{
+				file << 'f';
+			}
+		}
+		file << std::endl;
+	}
+	for (int j = 0; j < UbicacionJefe.size(); ++j)
+	{
+
+		for (int i = 0; i < UbicacionJefe[j].size(); ++i)
+		{
+			if (UbicacionJefe[j][i] == true)
+			{
+				file << 't';
+			}
+			else
+			{
+				file << 'f';
+			}
+		}
+		file << std::endl;
+	}
+	for (int j = 0; j < jugador.inventario.size(); ++j) 
+	{
+		file << jugador.inventario[j] << ' ';
 	
 	}
+
 	file << '~';
 	file.close();
 
 }
 
-void Nuevo_Nivel(std::vector<std::vector<char>> &MapaReferencia, Jugador &jugador, std::vector<std::vector<char>> &MapaAfectado)
+ // La funcion para iniciar el juego 
+void CrearNivel(std::vector<std::vector<char>> &Mapa,Jugador &jugador ) 
 {
-	int nuevo_max_x =0;
-	int nuevo_max_y =0;
+	int nuevo_x = 0;
+	int nuevo_y = 0;
 
-	if (MapaReferencia == Nivel_1 || MapaReferencia == Nivel_2 || MapaReferencia == Nivel_3) 
+	for (int i = 0; i < Mapa.size(); ++i) // este for es para crear los bordes de los mapas para no sailrse de ellos 
 	{
-		if (MapaReferencia == Nivel_1) {
-		MapaReferencia = Nivel_2;
-		MapaAfectado = Nivel_2;
-		}
-		else if (MapaReferencia == Nivel_2) 
+
+		if (nuevo_x < Mapa[i].size())
 		{
-			MapaReferencia = Nivel_3;
-			MapaAfectado = Nivel_3;
+			nuevo_x = Mapa[i].size();
 		}
-	
-		for (int i = 0; i < MapaReferencia.size(); ++i) // este for es para crear los bordes de los mapas para no sailrse de ellos 
-		{
+		++nuevo_y;
 
-			if (nuevo_max_x < MapaAfectado[i].size())
-			{
-				nuevo_max_x = MapaAfectado[i].size();
-			}
-			++nuevo_max_y;
-
-		}
-		max_x = nuevo_max_x;
-		max_y = nuevo_max_y;
-
-		visitados.clear();
-
-		for (int j = 0; j < MapaReferencia.size(); ++j)// crear un vector vacio 
-		{
-			visitados.push_back({});
-
-			for (int i = 0; i < max_x; ++i)// Inicializar las posiciones como no vististadas o false 
-			{
-				visitados[j].push_back(false);
-			}
-		}
-		Enemigos_ubicacion.clear();
-
-		for (int j = 0; j < MapaReferencia.size(); ++j)
-		{
-			Enemigos_ubicacion.push_back({});
-
-			for (int i = 0; i < max_x; ++i)
-			{
-				if (MapaReferencia[j][i] == 'e')
-				{
-					Enemigos_ubicacion[j].push_back(true);
-				}
-				else if (MapaReferencia[j][i] == 'E')
-				{
-					Enemigos_ubicacion[j].push_back(true);
-				}
-				else
-				{
-					Enemigos_ubicacion[j].push_back(false);
-				}
-			}
-		}
-		for (int j = 0; j < MapaReferencia.size(); ++j)
-		{
-			for (int i = 0; i < MapaReferencia[j].size(); ++i)
-			{
-				if (MapaReferencia[j][i] == 'S')
-				{
-					jugador.M_Y = j;
-					jugador.M_X = i;
-					break;
-				}
-
-			}
-		}
-
-		Tesoro.clear();
-
-		for (int j = 0; j < MapaReferencia.size(); ++j)
-		{
-			Tesoro.push_back({});
-
-			for (int i = 0; i < MapaReferencia[j].size(); ++i)
-			{
-
-				if (MapaReferencia[j][i] == '!' || MapaReferencia[j][i] == 'K' || MapaReferencia[j][i] == 'k')
-				{
-					Tesoro[j].push_back(true);
-				}
-				else
-				{
-					Tesoro[j].push_back(false);
-				}
-			}
-
-		}
 	}
-	else 
-	{
-		std::cout << "falta algo ";
-	
-	}
+	 max_x= nuevo_x;
+	 max_y = nuevo_y;
+
+	 jugador.M_X = 2;
+	 jugador.M_Y = 2;
+
+	 for (int i = 0; i < Mapa.size(); ++i)
+	 {
+		 visitados.push_back({});
+		 for (int j = 0; j < Mapa[i].size(); ++j) 
+		 {
+			 visitados[i].push_back(false);
+		 }
+	 
+	 }
+
+	 for (int j = 0; j < Mapa.size(); ++j)
+	 {
+		 Enemigos_ubicacion.push_back({});
+
+		 for (int i = 0; i < max_x; ++i)
+		 {
+			 if (Mapa[j][i] == 'e')
+			 {
+				 Enemigos_ubicacion[j].push_back(true);
+			 }
+			 else if (Mapa[j][i] == 'E')
+			 {
+				 Enemigos_ubicacion[j].push_back(true);
+			 }
+			 else
+			 {
+				 Enemigos_ubicacion[j].push_back(false);
+			 }
+		 }
+	 }
+
+	 for (int j = 0; j < Mapa.size(); ++j)
+	 {
+		 for (int i = 0; i < Mapa[j].size(); ++i)
+		 {
+			 if (Mapa[j][i] == 'S')
+			 {
+				 jugador.M_Y = j;
+				 jugador.M_X = i;
+				 break;
+			 }
+
+		 }
+	 }
+
+	 for (int j = 0; j < Mapa.size(); ++j) 
+	 {
+		 for (int i = 0; i < Mapa[j].size(); ++i) 
+		 {
+			 if (Mapa[j][i] == 'F') 
+			 {
+				 Salida_Y = j;
+				 Salida_X = i;
+			 
+			 }
+
+		 }
+	 
+	 }
+
+	 for (int j = 0; j < Mapa.size(); ++j)
+	 {
+		 Tesoro.push_back({});
+
+		 for (int i = 0; i < Mapa[j].size(); ++i)
+		 {
+
+			 if (Mapa[j][i] == '!' || Mapa[j][i] == 'K' || Mapa[j][i] == 'k')
+			 {
+				 Tesoro[j].push_back(true);
+			 }
+			 else
+			 {
+				 Tesoro[j].push_back(false);
+			 }
+		 }
+
+	 }
+
+	 for (int j = 0; j < Mapa.size(); ++j)
+	 {
+		 Puertas.push_back({});
+		 for (int i = 0; i < Mapa[j].size(); ++i)
+		 {
+			 if (Mapa[j][i] == '#') 
+			 {
+				 Puertas[j].push_back(true);
+			 }
+			 else
+			 {
+				 Puertas[j].push_back(false);
+			 }
+		 }
+	 
+	 }
+
+	 for (int j = 0; j < Mapa.size(); ++j)
+	 {
+		 UbicacionJefe.push_back({});
+		 for (int i = 0; i < Mapa[j].size(); ++i)
+		 {
+			 if (Mapa[j][i] == 'B' || Mapa[j][i]=='b')
+			 {
+				 UbicacionJefe[j].push_back(true);
+			 }
+			 else
+			 {
+				 UbicacionJefe[j].push_back(false);
+			 }
+		 }
+
+	 }
+
 
 
 }
-
 
 // funcion main  
 int main()
 {
 
 	//stop();	
-	std::vector<std::vector<char>> MapaOriginal;
-
-
 	std::vector<std::vector<char>> Copia_nivel;
 
 	Jugador Mi_Jugador;
@@ -736,122 +1181,35 @@ int main()
 
 	std::cin >> Nombre_jugador;
 
+	Mi_Jugador.M_Nombre = Nombre_jugador;
+
 	std::cout << " dime que piso quieres tienes estas opciones ([{ 1,2,3}]) "; // esta parte del codigo es SOLO para probar el juego y tambien el std::cin>>comando que esta debajo
 
 	std::cin >> comando;
 
-	if (comando == "1")
-	{
+
+	
 		Copia_nivel = Nivel_1;
 		MapaOriginal = Nivel_1;
-	}
-	else if (comando == "2")
-	{
-		Copia_nivel = Nivel_2;
-		MapaOriginal = Nivel_2;
-	}
-	else if (comando == "3")
-	{
-		Copia_nivel = Nivel_3;
-		MapaOriginal = Nivel_3;
-	}
-	else if (comando == "p")
-	{
-		Copia_nivel = Test;
-		MapaOriginal = Test;
-	}
-	else
-	{
-		Copia_nivel = Nivel_1;
-	}
-	for (int i = 0; i < Copia_nivel.size(); ++i) // este for es para crear los bordes de los mapas para no sailrse de ellos 
-	{
 
-		if (nuevo_max_x < Copia_nivel[i].size())
-		{
-			nuevo_max_x = Copia_nivel[i].size();
-		}
-		++nuevo_max_y;
 
-	}
-	max_x = nuevo_max_x;
-	max_y = nuevo_max_y;
+	CrearNivel(Copia_nivel, Mi_Jugador);
 
 	Instrucciones();
-
-	Mi_Jugador.M_Nombre = Nombre_jugador;
-
-	Mi_Jugador.M_X = 2;
-	Mi_Jugador.M_Y = 2;
-
-
-	for (int j = 0; j < Copia_nivel.size(); ++j)// crear un vector vacio 
-	{
-		visitados.push_back({});
-
-		for (int i = 0; i < max_x; ++i)// Inicializar las posiciones como no vististadas o false 
-		{
-			visitados[j].push_back(false);
-		}
-	}
-	for (int j = 0; j < Copia_nivel.size(); ++j)
-	{
-		Enemigos_ubicacion.push_back({});
-
-		for (int i = 0; i < max_x; ++i)
-		{
-			if (Copia_nivel[j][i] == 'e')
-			{
-				Enemigos_ubicacion[j].push_back(true);
-			}
-			else if (Copia_nivel[j][i] == 'E')
-			{
-				Enemigos_ubicacion[j].push_back(true);
-			}
-			else
-			{
-				Enemigos_ubicacion[j].push_back(false);
-			}
-		}
-	}
-	for (int j = 0; j < Copia_nivel.size(); ++j)
-	{
-		for (int i = 0; i < Copia_nivel[j].size(); ++i)
-		{
-			if (Copia_nivel[j][i] == 'S')
-			{
-				Mi_Jugador.M_Y = j;
-				Mi_Jugador.M_X = i;
-				break;
-			}
-
-		}
-	}
-
-	for (int j = 0; j < Copia_nivel.size(); ++j) 
-	{
-		Tesoro.push_back({});
-	
-		for (int i = 0; i < Copia_nivel[j].size(); ++i) 
-		{
-		
-			if (Copia_nivel[j][i] == '!' || Copia_nivel[j][i]=='K' || Copia_nivel[j][i]=='k') 
-			{
-				Tesoro[j].push_back(true);
-			}
-			else
-			{
-				Tesoro[j].push_back(false);
-			}
-		}
-	
-	}
 
 	dibujar_mapa(Mi_Jugador.M_X, Mi_Jugador.M_Y, Copia_nivel, Mi_Jugador);
 
 	while (Juego_Activo == true)
 	{
 		std::cout <<std::endl<<" dime lo que quieres hacer \n";
+
+		if (Mi_Jugador.M_X == Salida_X && Mi_Jugador.M_Y == Salida_Y)
+		{
+			NextNevel(MapaOriginal, Mi_Jugador, Copia_nivel);
+			dibujar_mapa(Mi_Jugador.M_X, Mi_Jugador.M_Y, Copia_nivel, Mi_Jugador);
+		}
+
+
 		std::cin >> comando;
 
 		if (comando == "N" || comando == "n" || comando == "norte" || comando == "Norte")// encargado del movimiento y que el jugador no se salga de las bareras del juego 
@@ -867,7 +1225,41 @@ int main()
 			{
 				Mi_Jugador.M_Y += 1;
 			}
+			else if (Copia_nivel[Mi_Jugador.M_Y][Mi_Jugador.M_X] == '#' && Puertas[Mi_Jugador.M_Y][Mi_Jugador.M_X] == true)
+			{
+				bool Tienes_llave = false;
 
+				for (int i = 0; i < Mi_Jugador.inventario.size(); ++i) 
+				{
+					if (Mi_Jugador.inventario[i] == "llave") 
+					{
+						Tienes_llave = true;
+						break;
+					}
+				
+				}
+				
+				if (Tienes_llave == true) 
+				{
+					Puertas[Mi_Jugador.M_Y][Mi_Jugador.M_X] = false;
+					for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+					{
+						if (Mi_Jugador.inventario[i] == "llave") 
+						{
+							Mi_Jugador.inventario.erase(Mi_Jugador.inventario.begin() + i);
+							break;
+						}
+
+					}
+					std::cout << "Usaste un llave men " << std::endl;
+				}
+				else
+				{
+					Mi_Jugador.M_Y += 1;
+				
+				}
+
+			}
 		}
 		else if (comando == "S" || comando == "s")// encargado del movimiento y que el jugador no se salga de las bareras del juego  
 		{
@@ -881,6 +1273,43 @@ int main()
 			{
 				Mi_Jugador.M_Y -= 1;
 			}
+			else if (Copia_nivel[Mi_Jugador.M_Y][Mi_Jugador.M_X] == '#' && Puertas[Mi_Jugador.M_Y][Mi_Jugador.M_X] == true)
+			{
+				bool Tienes_llave = false;
+
+				for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+				{
+					if (Mi_Jugador.inventario[i] == "llave")
+					{
+						Tienes_llave = true;
+						break;
+					}
+
+				}
+
+				if (Tienes_llave == true)
+				{
+					Puertas[Mi_Jugador.M_Y][Mi_Jugador.M_X] = false;
+					for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+					{
+						if (Mi_Jugador.inventario[i] == "llave")
+						{
+							Mi_Jugador.inventario.erase(Mi_Jugador.inventario.begin() + i);
+							break;
+						}
+
+					}
+					std::cout << "Usaste un llave men " << std::endl;
+				}
+				else
+				{
+					Mi_Jugador.M_Y -= 1;
+
+				}
+
+			}
+		
+
 		}
 		else if (comando == "E" || comando == "e")// encargado del movimiento y que el jugador no se salga de las bareras del juego  
 		{
@@ -894,6 +1323,41 @@ int main()
 			{
 				Mi_Jugador.M_X -= 1;
 			}
+			else if (Copia_nivel[Mi_Jugador.M_Y][Mi_Jugador.M_X] == '#' && Puertas[Mi_Jugador.M_Y][Mi_Jugador.M_X] == true)
+			{
+				bool Tienes_llave=false;
+
+				for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+				{
+					if (Mi_Jugador.inventario[i] == "llave")
+					{
+						Tienes_llave = true;
+						break;
+					}
+
+				}
+
+				if (Tienes_llave == true)
+				{
+					Puertas[Mi_Jugador.M_Y][Mi_Jugador.M_X] = false;
+					for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+					{
+						if (Mi_Jugador.inventario[i] == "llave")
+						{
+							Mi_Jugador.inventario.erase(Mi_Jugador.inventario.begin() + i);
+							break;
+						}
+
+					}
+					std::cout << "Usaste un llave men " << std::endl;
+				}
+				else
+				{
+					Mi_Jugador.M_X -= 1;
+
+				}
+			}
+
 		}
 		else if (comando == "O" || comando == "o" || comando == "olaf" || comando == "w" || comando == "W" || comando == "wambo")// encargado del movimiento y que el jugador no se salga de las bareras del juego 
 		{
@@ -907,6 +1371,51 @@ int main()
 			{
 				Mi_Jugador.M_X += 1;
 			}
+			else if (Copia_nivel[Mi_Jugador.M_Y][Mi_Jugador.M_X] == '#' && Puertas[Mi_Jugador.M_Y][Mi_Jugador.M_X] == true)
+			{
+				bool Tienes_llave = false;
+
+				for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+				{
+					if (Mi_Jugador.inventario[i] == "llave")
+					{
+						Tienes_llave = true;
+						break;
+					}
+
+				}
+
+				if (Tienes_llave == true)
+				{
+					Puertas[Mi_Jugador.M_Y][Mi_Jugador.M_X] = false;
+					for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
+					{
+						if (Mi_Jugador.inventario[i] == "llave")
+						{
+							Mi_Jugador.inventario.erase(Mi_Jugador.inventario.begin() + i);
+							break;
+						}
+
+					}
+					std::cout << "Usaste un llave men " << std::endl;
+				}
+				else
+				{
+					Mi_Jugador.M_X += 1;
+
+				}
+			}
+
+		}
+		else if(comando=="jojo"||comando=="Jojo"||comando=="JOJO")
+		{
+			extra_line(2);
+			std::cout << "ahora eres un dios "<<std::endl;
+			Mi_Jugador.M_Vida += 20;
+			Mi_Jugador.M_Ataque += 8;
+			Mi_Jugador.M_VidaMaxima += 20;
+			std::cout << "tu Vida es : " << Mi_Jugador.M_Vida << std::endl << "Tu ataque es : " << Mi_Jugador.M_Ataque << std::endl;
+
 		}
 		else if (comando == "Nombre" || comando == "nombre" || comando == "estadisticas" || comando == "todo" || comando == "nav" || comando == "NAV")
 		{
@@ -930,13 +1439,14 @@ int main()
 		}
 		else if (comando == "z")
 		{
-			Nuevo_Nivel(MapaOriginal , Mi_Jugador, Copia_nivel);
+			NextNevel(MapaOriginal , Mi_Jugador, Copia_nivel);
 		}
 		else if (comando == "usar")
 		{
-			std::string ObjetoDesiado;
+			std::string ObjetoDesiado = "";
 			int cantidad = 0;
-
+			const int SoloUno = 1;
+			bool verificador = false;
 			/*
 			"pocion"
 			"contenedor de corazon"
@@ -956,7 +1466,7 @@ int main()
 
 			for (int i = 0; i < Mi_Jugador.inventario.size(); ++i)
 			{
-				if (Mi_Jugador.inventario[i] == "contenedor de corazon")
+				if (Mi_Jugador.inventario[i] == "contenedor_de_corazon")
 				{
 					++cantidad;
 				}
@@ -976,9 +1486,74 @@ int main()
 			std::cout << cantidad << " pocion, ";
 			cantidad = 0;
 			std::cout << " para usar preciona las numeros debajo del objeto que quieras usar " << std::endl << "	[1]		[2]		      [3]"<<std::endl;
+			std::cin >> comando;
+			if (comando == "1") 
+			{
+				ObjetoDesiado = "anime";
 			
+			}
+			else if (comando == "2") 
+			{
+				ObjetoDesiado = "contenedor_de_corazon";
+			}
+			else if (comando == "3") 
+			{
+				ObjetoDesiado = "pocion";
+			}
+			else 
+			{
+				std::cout << "no se que chigados es lo que quieres men intentalo de nuevo ";
+			}
 			
+			if (comando == "1" || comando == "2" || comando == "3") 
+			{
+			
+				for (int i = 0; i < Mi_Jugador.inventario.size(); ++i) 
+				{
+					if (Mi_Jugador.inventario[i] == ObjetoDesiado) 
+					{
+						Mi_Jugador.inventario.erase(Mi_Jugador.inventario.begin() + i);
+						verificador = true;
+						break;
+					}
+				
+				}
 
+			}
+
+			if (ObjetoDesiado == "anime"&& verificador == true) 
+			{
+				Mi_Jugador.M_Ataque += 1;
+				std::cout << "El anime te inspira para dar putazos mas fuertes PLUS ULTRA !!!!!!!!!!";
+			}
+			else if (ObjetoDesiado == "contenedor_de_corazon"&& verificador == true) 
+			{
+				Mi_Jugador.M_VidaMaxima += 1;
+				Mi_Jugador.M_Vida = Mi_Jugador.M_VidaMaxima;
+				std::cout << "tu vida maxima ahora es " << Mi_Jugador.M_VidaMaxima;
+			}
+			else if (ObjetoDesiado == "pocion"&& verificador == true) 
+			{
+				if (Mi_Jugador.M_Vida >= Mi_Jugador.M_VidaMaxima)
+				{
+					std::cout << "men que haces no estas herido casi gastas una pocion ";
+					Mi_Jugador.inventario.push_back("pocion");
+				}
+				else
+				{
+					Mi_Jugador.M_Vida += Mi_Jugador.M_VidaMaxima / 2;
+					if (Mi_Jugador.M_Vida > Mi_Jugador.M_VidaMaxima) 
+					{
+						Mi_Jugador.M_Vida = Mi_Jugador.M_VidaMaxima;
+					}
+					std::cout << "te sansate men ";
+				}
+
+			}
+			else
+			{
+				std::cout << std::endl << "no tienes ese Objetos que esta pidiendo O pusiste un comando incorrecto ";
+			}
 		}
 		else if (comando == "cargar" || comando == "CARGAR" || comando == "Cargar")
 		{
@@ -1000,14 +1575,15 @@ int main()
 
 				int columnas = 0;
 
+				std::string cosas = "";
+
 				bool valor_binario = false;
 
 				std::vector<std::vector<char>> Mapa_De_Partida;
 
 				std::vector<std::vector<bool>> map_valores_binario;
 
-
-				partida >> Mi_Jugador.M_Nombre >> Mi_Jugador.M_Ataque >> Mi_Jugador.M_Vida >> Mi_Jugador.M_X >> Mi_Jugador.M_Y>>columnas>>renglones>>max_x>>max_y;
+				partida >> Mi_Jugador.M_Nombre >> Mi_Jugador.M_Ataque >> Mi_Jugador.M_Vida >> Mi_Jugador.M_X >> Mi_Jugador.M_Y >> columnas >> renglones >> max_x >> max_y >> Salida_X >> Salida_Y;
 
 				for (int i = 0; i < columnas; ++i)
 				{
@@ -1107,11 +1683,80 @@ int main()
 						}
 
 					}
+					Tesoro.clear();
 
+					for (int i = 0; i < columnas; ++i)
+					{
+						Tesoro.push_back({});
+					}
 
+					for (int j = 0; j < columnas; ++j) 
+					{
+					
+						for (int i = 0; i < renglones; ++i) {
+
+							partida >> simbolos;
+
+							if (simbolos == 'f') 
+							{
+								valor_binario = false;
+							}
+							else
+							{
+								valor_binario = true;
+							}
+							Tesoro[j].push_back(valor_binario);
+						}
+					}
+					Puertas.clear();
+					for(int j=0; j < columnas;++j)
+					{
+						Puertas.push_back({});
+						for (int i = 0; i < renglones; ++i) 
+						{
+							partida >> simbolos;
+
+							if (simbolos == 't') 
+							{
+								valor_binario = true;
+							}
+							else
+							{
+								valor_binario = false;
+							}
+							Puertas[j].push_back(valor_binario);
+						}
+					
+					}
+					UbicacionJefe.clear();
+					for (int j = 0; j < columnas; ++j)
+					{
+						UbicacionJefe.push_back({});
+						for (int i = 0; i < renglones; ++i)
+						{
+							partida >> simbolos;
+
+							if (simbolos == 't')
+							{
+								valor_binario = true;
+							}
+							else
+							{
+								valor_binario = false;
+							}
+							UbicacionJefe[j].push_back(valor_binario);
+						}
+
+					}
+					break;
 				}// aqui termina el while 
 
+				while(partida>>cosas)
+				{
+					Mi_Jugador.inventario.push_back(cosas);
 
+					partida >> cosas;
+				}
 				visitados = map_valores_binario;
 
 				Copia_nivel = Mapa_De_Partida;
